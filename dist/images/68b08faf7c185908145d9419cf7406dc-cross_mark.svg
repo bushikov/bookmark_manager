@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="64"
+   height="64"
+   viewBox="0 0 16.933333 16.933333"
+   version="1.1"
+   id="svg5"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2">
+    <linearGradient
+       id="linearGradient17310">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop17308" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient17302">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop17300" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient17206">
+      <stop
+         style="stop-color:#ff0000;stop-opacity:1;"
+         offset="0"
+         id="stop17204" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient15198">
+      <stop
+         style="stop-color:#ff0000;stop-opacity:1;"
+         offset="0"
+         id="stop15196" />
+    </linearGradient>
+  </defs>
+  <g
+     id="layer1">
+    <ellipse
+       style="fill:#000000;fill-opacity:0.2;fill-rule:evenodd;stroke:none;stroke-width:0.264559;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="path14195"
+       ry="8.4666891"
+       rx="8.4665785"
+       cy="8.4667501"
+       cx="8.4669018" />
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:0.846221;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect18649"
+       width="10.970599"
+       height="0.72869056"
+       x="6.4886003"
+       y="-0.36445269"
+       transform="rotate(45)" />
+    <rect
+       style="fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:0.846221;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
+       id="rect18649-6"
+       width="10.970599"
+       height="0.72869056"
+       x="-5.4851923"
+       y="11.609554"
+       transform="rotate(-45)" />
+  </g>
+</svg>
