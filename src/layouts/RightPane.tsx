@@ -16,7 +16,7 @@ export const RightPane: React.FC<RightPaneProps> = ({
   addTag,
   removeTag,
 }) => {
-  const { tags, setTexts } = useTags({ base: "nothing" });
+  const { tags, setTexts } = useTags({ base: "all" });
 
   useEffect(() => {
     // スクロール位置の初期化

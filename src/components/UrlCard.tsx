@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Tag } from "components/Tag";
 
 type UrlCardProps = {
   title: string;
   url: string;
   tags?: string[];
-  tagCandidates?: string[];
+  tagCandidates: string[];
   onAdd: (arg0: string) => void;
   onDelete: (arg0: string) => void;
   onChange: (arg0: string) => void;
@@ -22,6 +22,18 @@ export const UrlCard: React.FC<UrlCardProps> = ({
 }) => {
   const [text, setText] = useState<string>("");
   const [isFocused, setIsFocused] = useState<boolean>(false);
+  const [addableTagCandidates, setAddableTagCandidates] = useState<string[]>(
+    tagCandidates
+  );
+
+  useEffect(() => {
+    if (tags && tagCandidates) {
+      setAddableTagCandidates(tagCandidates.filter((c) => !tags.includes(c)));
+    }
+    return () => {
+      setAddableTagCandidates(tagCandidates);
+    };
+  }, [tags, tagCandidates]);
 
   return (
     <div className="block w-full rounded pb-2 shadow-md">
@@ -72,23 +84,25 @@ export const UrlCard: React.FC<UrlCardProps> = ({
               setTimeout(() => setIsFocused(false), 100);
             }}
           />
-          {isFocused && tagCandidates && tagCandidates.length !== 0 && (
-            <ul className="absolute bg-white w-full border border-gray-200 pl-2 py-1 max-h-32 overflow-y-scroll">
-              {tagCandidates.map((tagCandidate) => (
-                <li
-                  className="cursor-pointer"
-                  key={tagCandidate}
-                  onClick={() => {
-                    onAdd(tagCandidate);
-                    setText("");
-                    onChange("");
-                  }}
-                >
-                  {tagCandidate}
-                </li>
-              ))}
-            </ul>
-          )}
+          {isFocused &&
+            addableTagCandidates &&
+            addableTagCandidates.length !== 0 && (
+              <ul className="absolute bg-white w-full border border-gray-200 pl-2 py-1 max-h-32 overflow-y-scroll">
+                {addableTagCandidates.map((tagCandidate) => (
+                  <li
+                    className="cursor-pointer"
+                    key={tagCandidate}
+                    onClick={() => {
+                      onAdd(tagCandidate);
+                      setText("");
+                      onChange("");
+                    }}
+                  >
+                    {tagCandidate}
+                  </li>
+                ))}
+              </ul>
+            )}
         </div>
       </div>
     </div>
