@@ -106,7 +106,7 @@ class MyDB extends Dexie {
           return {
             id: b.id,
             url: b.url,
-            title: b.url,
+            title: b.title,
             favIconUrl: b.favIconUrl,
             tags: bookmarkTagRelationship
               .filter((btr) => btr.bookmarkId === b.id)
