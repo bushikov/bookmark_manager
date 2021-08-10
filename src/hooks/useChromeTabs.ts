@@ -32,6 +32,18 @@ export const useChromeTabs = (): ChromeTabs => {
       }
     };
     callback();
+
+    chrome.tabs.onUpdated.addListener(callback);
+    chrome.tabs.onRemoved.addListener(callback);
+    chrome.tabs.onMoved.addListener(callback);
+    chrome.tabs.onAttached.addListener(callback);
+
+    return () => {
+      chrome.tabs.onUpdated.removeListener(callback);
+      chrome.tabs.onRemoved.removeListener(callback);
+      chrome.tabs.onMoved.removeListener(callback);
+      chrome.tabs.onAttached.removeListener(callback);
+    };
   }, [targetWindowId]);
 
   return {
