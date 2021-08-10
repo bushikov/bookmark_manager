@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useBookmarks } from "hooks";
+import React, { useEffect } from "react";
+import { useTags } from "hooks";
 import { UrlCard } from "components/UrlCard";
 import { BookmarkWithTags } from "db";
 
@@ -16,6 +16,8 @@ export const RightPane: React.FC<RightPaneProps> = ({
   addTag,
   removeTag,
 }) => {
+  const { tags, setTexts } = useTags({ base: "nothing" });
+
   useEffect(() => {
     // スクロール位置の初期化
     document.getElementById("rightpane").scrollTo(0, 0);
@@ -37,11 +39,15 @@ export const RightPane: React.FC<RightPaneProps> = ({
               title={bookmark.title}
               url={bookmark.url}
               tags={bookmark.tags}
+              tagCandidates={tags}
               onAdd={(tag) => {
                 addTag(tag, bookmark);
               }}
               onDelete={(tag) => {
                 removeTag(tag, bookmark);
+              }}
+              onChange={(text) => {
+                setTexts([text]);
               }}
             />
           </div>

@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { useChromeWindows } from "hooks";
+import React, { useState } from "react";
+import { useChromeWindows, useTags } from "hooks";
 import { TabHeader } from "components/TabHeader";
 import { TitleCard } from "components/TitleCard";
 import { Accordion } from "components/Accordion";
-import { useTags } from "hooks";
 
 type WindowListProps = {
   onWindowSelect: (id: number) => void;
@@ -52,7 +51,7 @@ type TagListProps = {
 };
 
 const TagList: React.FC<TagListProps> = ({ onTagSelect }) => {
-  const { tags, setTexts } = useTags();
+  const { tags, setTexts } = useTags({ base: "all" });
 
   return (
     <>
