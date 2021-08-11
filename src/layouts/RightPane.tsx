@@ -8,6 +8,7 @@ type RightPaneProps = {
   bookmarks: BookmarkWithTags[];
   addTag: (arg0: string, arg1: BookmarkWithTags) => void;
   removeTag: (arg0: string, arg1: BookmarkWithTags) => void;
+  reflashFlg: any;
 };
 
 export const RightPane: React.FC<RightPaneProps> = ({
@@ -15,13 +16,14 @@ export const RightPane: React.FC<RightPaneProps> = ({
   bookmarks,
   addTag,
   removeTag,
+  reflashFlg,
 }) => {
   const { tags, setTexts } = useTags({ base: "all" });
 
   useEffect(() => {
     // スクロール位置の初期化
     document.getElementById("rightpane").scrollTo(0, 0);
-  }, []);
+  }, [reflashFlg]);
 
   return (
     <div

@@ -26,6 +26,7 @@ const App: React.FC<{}> = () => {
           bookmarks={bookmarks}
           addTag={addTag}
           removeTag={removeTag}
+          reflashFlg={urls}
         />
       </div>
     </div>
