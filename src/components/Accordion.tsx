@@ -19,7 +19,7 @@ export const Accordion: React.FC<AccordionProps> = ({
   return (
     <>
       <div
-        className="border border-gray-200 p-2 cursor-pointer"
+        className="border border-gray-200 p-3 cursor-pointer"
         onClick={() => setIsFolded(!isFolded)}
       >
         {title}
@@ -29,15 +29,26 @@ export const Accordion: React.FC<AccordionProps> = ({
         labels.map((label, index) => (
           <div
             key={label}
-            onClick={() => {
-              setSelectedIndex(index);
-              onSelect(label);
-            }}
-            className={`border border-gray-200 py-2 pl-8 cursor-pointer ${
+            className={`border border-gray-200 pl-8 py-2 pr-2 ${
               isFocus && index === selectedIndex ? "bg-gray-200" : "bg-white"
             }`}
           >
-            {label}
+            <div className="flex flex-row justify-between">
+              <p className="py-1">{label}</p>
+              <button
+                className={`rounded px-2 py-1 bg-gray-100 hover:bg-gray-300 focus:ring ${
+                  isFocus && index == selectedIndex
+                    ? "shadow-inner"
+                    : "shadow-md"
+                }`}
+                onClick={() => {
+                  setSelectedIndex(index);
+                  onSelect(label);
+                }}
+              >
+                SELECT
+              </button>
+            </div>
           </div>
         ))}
     </>
