@@ -22,18 +22,9 @@ export const UrlCard: React.FC<UrlCardProps> = ({
 }) => {
   const [text, setText] = useState<string>("");
   const [isFocused, setIsFocused] = useState<boolean>(false);
-  const [addableTagCandidates, setAddableTagCandidates] = useState<string[]>(
-    tagCandidates
-  );
-
-  useEffect(() => {
-    if (tags && tagCandidates) {
-      setAddableTagCandidates(tagCandidates.filter((c) => !tags.includes(c)));
-    }
-    return () => {
-      setAddableTagCandidates(tagCandidates);
-    };
-  }, [tags, tagCandidates]);
+  const addableTagCandidates = tags
+    ? tagCandidates.filter((c) => !tags.includes(c))
+    : tagCandidates;
 
   return (
     <div className="block w-full rounded pb-2 shadow-md">
