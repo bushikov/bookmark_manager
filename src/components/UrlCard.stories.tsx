@@ -17,6 +17,7 @@ UrlCardDefault.args = {
   tags: ["タグ１", "タグ２", "タグ３"],
   onAdd: (text) => console.log(text),
   onDelete: (text) => console.log(text),
+  tagCandidates: [],
 };
 
 export const UrlCardNothing = Tempate.bind({});
@@ -26,6 +27,7 @@ UrlCardNothing.args = {
   url: "https://www.amazon.co.jp/dp/B01NCX3W3O/",
   onAdd: (text) => console.log(text),
   onDelete: (text) => console.log(text),
+  tagCandidates: [],
 };
 
 export const UrlCardTagCandidate = Tempate.bind({});
