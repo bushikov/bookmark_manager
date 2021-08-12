@@ -1,6 +1,6 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { Accordion } from "./Accordion";
+import { Accordion, FunctionalAccordion } from "./Accordion";
 
 export default {
   title: "Component/Accordion",
@@ -17,4 +17,19 @@ AccordionDefault.args = {
   labels: ["ラベル１", "ラベル２"],
   isFocus: true,
   onSelect: (label) => console.log(label),
+};
+
+const FunctionalAccordionTemplate: ComponentStory<
+  typeof FunctionalAccordion
+> = (args) => <FunctionalAccordion {...args} />;
+
+export const FunctionalAccordionDefault = FunctionalAccordionTemplate.bind({});
+FunctionalAccordionDefault.args = {
+  title: "タイトル",
+  labels: ["ラベル１", "ラベル２"],
+  isFocus: true,
+  onSelect: (label) => console.log(label),
+  onAdd: () => console.log("ADD"),
+  onEdit: () => console.log("EDIT"),
+  onDelete: (label) => console.log(label),
 };
