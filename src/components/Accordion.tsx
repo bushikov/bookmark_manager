@@ -17,7 +17,7 @@ export const Accordion: React.FC<AccordionProps> = ({
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   return (
-    <>
+    <div>
       <div
         className="border border-gray-200 p-3 cursor-pointer"
         onClick={() => setIsFolded(!isFolded)}
@@ -51,7 +51,7 @@ export const Accordion: React.FC<AccordionProps> = ({
             </div>
           </div>
         ))}
-    </>
+    </div>
   );
 };
 
@@ -74,7 +74,7 @@ export const FunctionalAccordion: React.FC<FunctionalAccordionProps> = ({
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
 
   return (
-    <>
+    <div>
       <div
         className="border border-gray-200 py-2 pl-3 pr-2 cursor-pointer"
         onClick={() => setIsFolded(!isFolded)}
@@ -82,7 +82,7 @@ export const FunctionalAccordion: React.FC<FunctionalAccordionProps> = ({
         <div className="flex flex-row justify-between">
           <p className="py-1">{title}</p>
           <button
-            className="rounded px-2 py-1 bg-red-500 text-white hover:bg-red-700 focus:ring shadow-lg"
+            className="rounded px-2 py-1 bg-blue-500 text-white hover:bg-blue-700 focus:ring shadow-lg"
             onClick={(e) => {
               e.stopPropagation();
               onAdd();
@@ -105,14 +105,20 @@ export const FunctionalAccordion: React.FC<FunctionalAccordionProps> = ({
               <p className="py-1">{label}</p>
               <div className="flex space-x-3">
                 <button
-                  className="rounded px-2 py-1 bg-red-500 text-white hover:bg-red-700 focus:ring shadow-lg"
-                  onClick={() => onEdit(label)}
+                  className="rounded px-2 py-1 bg-blue-500 text-white hover:bg-blue-700 focus:ring shadow-lg"
+                  onClick={() => {
+                    setSelectedIndex(null);
+                    onEdit(label);
+                  }}
                 >
                   EDIT
                 </button>
                 <button
                   className="rounded px-2 py-1 bg-red-500 text-white hover:bg-red-700 focus:ring shadow-lg"
-                  onClick={() => onDelete(label)}
+                  onClick={() => {
+                    setSelectedIndex(null);
+                    onDelete(label);
+                  }}
                 >
                   DELETE
                 </button>
@@ -133,6 +139,6 @@ export const FunctionalAccordion: React.FC<FunctionalAccordionProps> = ({
             </div>
           </div>
         ))}
-    </>
+    </div>
   );
 };

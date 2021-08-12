@@ -14,32 +14,34 @@ type BookmarkTagRelationship = {
   bookmarkId: number;
 };
 
-// type GroupTagRelationship = {
-//   groupName: string;
-//   tagNames: string[];
-// };
+export type AliasType = "rename" | "and" | "or";
+
+export type TagAlias = {
+  aliasName: string;
+  type: AliasType;
+  tags: string[];
+};
 
 export type BookmarkWithTags = Bookmark & { tags: string[] };
 
 class MyDB extends Dexie {
   bookmarks: Dexie.Table<Bookmark, number>;
   bookmarkTagRelationship: Dexie.Table<BookmarkTagRelationship, number>;
-  // groupTagRelationship: Dexie.Table<GroupTagRelationship, string>;
+  tagAliases: Dexie.Table<TagAlias, string>;
 
   constructor() {
     super("MYDB");
     this.version(1).stores({
       bookmarks: "++id,&url,title",
       bookmarkTagRelationship: "++id,tagName,bookmarkId,&[tagName+bookmarkId]",
-      // groupTagRelationship: "groupName",
+      tagAliases: "aliasName",
     });
   }
 
   async addTag(tag: string, bookmark: BookmarkWithTags): Promise<void> {
     return this.transaction(
       "rw",
-      this.bookmarks,
-      this.bookmarkTagRelationship,
+      [this.bookmarks, this.bookmarkTagRelationship],
       async () => {
         const storedBookmark = await this.bookmarks.get({ url: bookmark.url });
         let bookmarkId: number;
@@ -148,6 +150,35 @@ class MyDB extends Dexie {
         .toArray((records) =>
           Array.from(new Set(records.map((record) => record.tagName)))
         );
+    });
+  }
+
+  async getAliases(texts: string[]): Promise<TagAlias[]> {
+    return this.transaction("r", this.tagAliases, async () => {
+      return await this.tagAliases
+        .where("aliasName")
+        .startsWithAnyOfIgnoreCase(texts)
+        .toArray();
+    });
+  }
+
+  async getTagsByAlias(aliasName: string): Promise<string[]> {
+    return this.transaction("r", this.tagAliases, async () => {
+      const record = await this.tagAliases.get(aliasName);
+      if (!record) return Promise.resolve([]);
+      return Promise.resolve(record.tags);
+    });
+  }
+
+  async putAlias(alias: TagAlias): Promise<void> {
+    return this.transaction("rw", this.tagAliases, async () => {
+      await this.tagAliases.put(alias);
+    });
+  }
+
+  async removeAlias(aliasName: string): Promise<void> {
+    return this.transaction("rw", this.tagAliases, async () => {
+      await this.tagAliases.delete(aliasName);
     });
   }
 }

@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { useChromeWindows, useTags } from "hooks";
 import { TabHeader } from "components/TabHeader";
 import { TitleCard } from "components/TitleCard";
-import { Accordion } from "components/Accordion";
+import { Accordion, FunctionalAccordion } from "components/Accordion";
+import { Form } from "components/Form";
+import { TagAlias } from "db";
 
 type WindowListProps = {
   onWindowSelect: (id: number) => void;
@@ -46,16 +48,31 @@ const WindowList: React.FC<WindowListProps> = ({ onWindowSelect }) => {
   );
 };
 
+const initialTagAlias: TagAlias = {
+  aliasName: "",
+  type: "rename",
+  tags: [],
+};
+
 type TagListProps = {
   onTagSelect: (arg0: string) => void;
 };
 
 const TagList: React.FC<TagListProps> = ({ onTagSelect }) => {
-  const { tags, setTexts } = useTags({ base: "all" });
+  const { tags, tagAliases, setTexts, addAlias, removeAlias } = useTags({
+    base: "all",
+  });
+  const [focusedComponent, setFocusedComponent] = useState<"tag" | "alias">(
+    "tag"
+  );
+  const [isFormOn, setIsFormOn] = useState(false);
+  const [targetTagAlias, setTargetTagAlias] = useState<TagAlias>(
+    initialTagAlias
+  );
 
   return (
     <>
-      <div className="pb-2">
+      <div className="pb-4">
         <input
           type="text"
           className="px-2 py-1 rounded bg-gray-100 shadow-inner focus:ring focus:outline-none w-full text-base"
@@ -69,13 +86,59 @@ const TagList: React.FC<TagListProps> = ({ onTagSelect }) => {
           }}
         />
       </div>
-      <div>
+      <div className="space-y-4">
         <Accordion
           title="Tag"
           labels={tags}
-          isFocus={true}
-          onSelect={onTagSelect}
+          isFocus={focusedComponent === "tag"}
+          onSelect={(label) => {
+            setFocusedComponent("tag");
+            onTagSelect(label);
+          }}
         />
+        <FunctionalAccordion
+          title="Tag alias"
+          labels={tagAliases.map((alias) => alias.aliasName)}
+          isFocus={focusedComponent == "alias"}
+          onSelect={(label) => {
+            setFocusedComponent("alias");
+            console.log(label);
+          }}
+          onAdd={() => {
+            setIsFormOn(true);
+          }}
+          onEdit={(label) => {
+            setTargetTagAlias(
+              tagAliases.find((alias) => alias.aliasName === label)
+            );
+            setIsFormOn(true);
+            setFocusedComponent("alias");
+          }}
+          onDelete={(label) => removeAlias(label)}
+        />
+        {isFormOn && (
+          <div
+            className="fixed top-0 left-0 right-0 bottom-0 bg-gray-900 bg-opacity-80 p-20"
+            onClick={() => {
+              setIsFormOn(false);
+              setTargetTagAlias(initialTagAlias);
+            }}
+          >
+            <Form
+              initialAliasName={targetTagAlias.aliasName}
+              initialType={targetTagAlias.type}
+              initialTags={targetTagAlias.tags.join(" ")}
+              onSubmit={(alias) => {
+                addAlias(alias);
+                setIsFormOn(false);
+              }}
+              onCancel={() => {
+                setIsFormOn(false);
+                setTargetTagAlias(initialTagAlias);
+              }}
+            />
+          </div>
+        )}
       </div>
     </>
   );

@@ -51,7 +51,7 @@ export const UrlCard: React.FC<UrlCardProps> = ({
       )}
       <div className="px-4 pt-2 space-x-2 flex flex-row">
         <button
-          className="rounded bg-red-500 hover:bg-red-700 text-white font-bold px-2 focus:ring"
+          className="rounded bg-blue-500 hover:bg-blue-700 text-white font-bold px-2 focus:ring"
           onClick={() => {
             onAdd(text);
             setText("");
