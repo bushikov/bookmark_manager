@@ -68,14 +68,15 @@ class MyDB extends Dexie {
     );
   }
 
-  async getBookmarksWithTagsByTag(tag: string): Promise<BookmarkWithTags[]> {
+  async getBookmarksWithTagsByTag(tags: string[]): Promise<BookmarkWithTags[]> {
     return this.transaction(
       "r",
       [this.bookmarks, this.bookmarkTagRelationship],
       async () => {
         const bookmarkIds = await this.bookmarkTagRelationship
           .where("tagName")
-          .equals(tag)
+          // .equals(tag)
+          .anyOfIgnoreCase(tags)
           .toArray((records) => records.map((record) => record.bookmarkId));
 
         const bookmarks = await this.bookmarks.bulkGet(bookmarkIds);
@@ -162,9 +163,66 @@ class MyDB extends Dexie {
     });
   }
 
-  async getTagsByAlias(aliasName: string): Promise<string[]> {
+  async getBookamrksByTagAlias(alias: TagAlias | null): Promise<Bookmark[]> {
+    return this.transaction(
+      "r",
+      [this.tagAliases, this.bookmarkTagRelationship, this.bookmarks],
+      async () => {
+        if (!alias) return Promise.resolve([]);
+        const storedTagAlias = await this.tagAliases.get(alias.aliasName);
+        if (!storedTagAlias) return Promise.resolve([]);
+
+        let bookmarkIds;
+        let urls;
+        switch (storedTagAlias.type) {
+          case "rename":
+          case "or":
+            bookmarkIds = await this.bookmarkTagRelationship
+              .where("tagName")
+              .anyOfIgnoreCase(storedTagAlias.tags)
+              .toArray((records) => records.map((record) => record.bookmarkId));
+
+            urls = await this.bookmarks
+              .where("id")
+              .anyOf(bookmarkIds)
+              .toArray((records) => records.map((record) => record.url));
+
+            return await this.getBookmarksWithTagsByUrls(urls);
+          case "and":
+            const bookmarkIdsOnTag = await this.bookmarkTagRelationship
+              .where("tagName")
+              .anyOfIgnoreCase(storedTagAlias.tags)
+              .toArray((records) =>
+                records.reduce((acc, record) => {
+                  acc[record.tagName] ||= [];
+                  acc[record.tagName].push(record.bookmarkId);
+                  return acc;
+                }, {})
+              );
+
+            // 積集合(intersection)を算出する
+            bookmarkIds = Object.values(bookmarkIdsOnTag).reduce(
+              (acc: number[], ids: number[]) => {
+                return acc.filter((a) => ids.includes(a));
+              }
+            );
+
+            urls = await this.bookmarks
+              .where("id")
+              .anyOf(bookmarkIds)
+              .toArray((records) => records.map((record) => record.url));
+
+            return await this.getBookmarksWithTagsByUrls(urls);
+        }
+      }
+    );
+  }
+
+  async getTagsByAlias(alias: TagAlias | null): Promise<string[]> {
     return this.transaction("r", this.tagAliases, async () => {
-      const record = await this.tagAliases.get(aliasName);
+      if (!alias) return Promise.resolve([]);
+
+      const record = await this.tagAliases.get(alias);
       if (!record) return Promise.resolve([]);
       return Promise.resolve(record.tags);
     });

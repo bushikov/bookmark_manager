@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import db, { BookmarkWithTags } from "db";
+import db, { BookmarkWithTags, TagAlias } from "db";
 
 export const useBookmarks = () => {
   const [urls, setUrls] = useState([]);
-  const [tag, setTag] = useState("");
+  const [tags, setTags] = useState([""]);
+  const [tagAlias, setTagAlias] = useState<TagAlias | null>(null);
   const [bookmarks, setBookmarks] = useState([]);
   const [reloadFlag, setReloadFlag] = useState(false);
 
@@ -23,10 +24,16 @@ export const useBookmarks = () => {
   }, [urls, reloadFlag]);
 
   useEffect(() => {
-    db.getBookmarksWithTagsByTag(tag).then((result) => {
+    db.getBookmarksWithTagsByTag(tags).then((result) => {
       setBookmarks(result);
     });
-  }, [tag]);
+  }, [tags]);
+
+  useEffect(() => {
+    db.getBookamrksByTagAlias(tagAlias).then((result) => {
+      setBookmarks(result);
+    });
+  }, [tagAlias]);
 
   const addTag = async (tag: string, bookmark: BookmarkWithTags) => {
     await db.addTag(tag, bookmark);
@@ -41,7 +48,8 @@ export const useBookmarks = () => {
   return {
     bookmarks,
     setUrls,
-    setTag,
+    setTags,
+    setTagAlias,
     addTag,
     removeTag,
   };

@@ -6,7 +6,14 @@ import { RightPane } from "layouts/RightPane";
 const App: React.FC<{}> = () => {
   const windowHeight = useWindowHeight();
   const { urls, setTargetWindowId } = useChromeTabs();
-  const { bookmarks, setUrls, setTag, addTag, removeTag } = useBookmarks();
+  const {
+    bookmarks,
+    setUrls,
+    setTags,
+    setTagAlias,
+    addTag,
+    removeTag,
+  } = useBookmarks();
 
   useEffect(() => {
     setUrls(urls);
@@ -17,8 +24,9 @@ const App: React.FC<{}> = () => {
       <LeftPane
         height={windowHeight}
         onWindowSelect={(windowId) => setTargetWindowId(windowId)}
-        onTagSelect={setTag}
+        onTagSelect={setTags}
         onTabChange={setTargetWindowId}
+        onTagAliasSelect={setTagAlias}
       />
       <div className="col-span-2">
         <RightPane

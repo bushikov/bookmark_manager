@@ -55,10 +55,11 @@ const initialTagAlias: TagAlias = {
 };
 
 type TagListProps = {
-  onTagSelect: (arg0: string) => void;
+  onTagSelect: (arg0: string[]) => void;
+  onTagAliasSelect: (arg0: TagAlias) => void;
 };
 
-const TagList: React.FC<TagListProps> = ({ onTagSelect }) => {
+const TagList: React.FC<TagListProps> = ({ onTagSelect, onTagAliasSelect }) => {
   const { tags, tagAliases, setTexts, addAlias, removeAlias } = useTags({
     base: "all",
   });
@@ -93,7 +94,7 @@ const TagList: React.FC<TagListProps> = ({ onTagSelect }) => {
           isFocus={focusedComponent === "tag"}
           onSelect={(label) => {
             setFocusedComponent("tag");
-            onTagSelect(label);
+            onTagSelect([label]);
           }}
         />
         <FunctionalAccordion
@@ -102,7 +103,9 @@ const TagList: React.FC<TagListProps> = ({ onTagSelect }) => {
           isFocus={focusedComponent == "alias"}
           onSelect={(label) => {
             setFocusedComponent("alias");
-            console.log(label);
+            onTagAliasSelect(
+              tagAliases.find((alias) => alias.aliasName === label)
+            );
           }}
           onAdd={() => {
             setIsFormOn(true);
@@ -149,8 +152,9 @@ const TabLabels = ["Window", "Tag"];
 type LeftPaneProps = {
   height: number;
   onWindowSelect: (arg0: number) => void;
-  onTagSelect: (arg0: string) => void;
+  onTagSelect: (arg0: string[]) => void;
   onTabChange: () => void;
+  onTagAliasSelect: (arg0: TagAlias) => void;
 };
 
 export const LeftPane: React.FC<LeftPaneProps> = ({
@@ -158,6 +162,7 @@ export const LeftPane: React.FC<LeftPaneProps> = ({
   onWindowSelect,
   onTagSelect,
   onTabChange,
+  onTagAliasSelect,
 }) => {
   const [tabIndex, setTabIndex] = useState(0);
 
@@ -174,7 +179,10 @@ export const LeftPane: React.FC<LeftPaneProps> = ({
         {tabIndex === 0 ? (
           <WindowList onWindowSelect={onWindowSelect} />
         ) : (
-          <TagList onTagSelect={onTagSelect} />
+          <TagList
+            onTagSelect={onTagSelect}
+            onTagAliasSelect={onTagAliasSelect}
+          />
         )}
       </div>
     </div>
