@@ -121,7 +121,7 @@ const TagList: React.FC<TagListProps> = ({ onTagSelect, onTagAliasSelect }) => {
         />
         {isFormOn && (
           <div
-            className="fixed top-0 left-0 right-0 bottom-0 bg-gray-900 bg-opacity-80 p-20"
+            className="fixed top-0 left-0 right-0 bottom-0 bg-gray-900 bg-opacity-80 p-20 z-50"
             onClick={() => {
               setIsFormOn(false);
               setTargetTagAlias(initialTagAlias);
