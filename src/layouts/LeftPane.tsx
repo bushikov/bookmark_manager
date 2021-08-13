@@ -103,9 +103,10 @@ const TagList: React.FC<TagListProps> = ({ onTagSelect, onTagAliasSelect }) => {
           isFocus={focusedComponent == "alias"}
           onSelect={(label) => {
             setFocusedComponent("alias");
-            onTagAliasSelect(
-              tagAliases.find((alias) => alias.aliasName === label)
-            );
+            // 新しくオブジェクトを作成しているのは、useEffectを毎回動作させたいため
+            onTagAliasSelect({
+              ...tagAliases.find((alias) => alias.aliasName === label),
+            });
           }}
           onAdd={() => {
             setIsFormOn(true);

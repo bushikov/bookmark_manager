@@ -6,43 +6,75 @@ export const useBookmarks = () => {
   const [tags, setTags] = useState([""]);
   const [tagAlias, setTagAlias] = useState<TagAlias | null>(null);
   const [bookmarks, setBookmarks] = useState([]);
-  const [reloadFlag, setReloadFlag] = useState(false);
+  const [lastUpdateMeans, setLastUpdateMeans] = useState<
+    "urls" | "tags" | "alias" | null
+  >(null);
+
+  const getBookmarksByUrls = async () => {
+    const records = await db.getBookmarksWithTagsByUrls(urls.map((u) => u.url));
+    const bookmarks = urls.map((url) => {
+      const storedBookmark = records.find((record) => record.url === url.url);
+      if (storedBookmark) return storedBookmark;
+      return url;
+    });
+    setBookmarks(bookmarks);
+  };
+
+  const getBookmarksByTags = async () => {
+    const bookmarks = await db.getBookmarksWithTagsByTags(tags);
+    setBookmarks(bookmarks);
+  };
+
+  const getBookmarksByTagAlias = async () => {
+    const bookmarks = await db.getBookmarksByTagAlias(tagAlias);
+    setBookmarks(bookmarks);
+  };
 
   useEffect(() => {
-    db.getBookmarksWithTagsByUrls(urls.map((u) => u.url)).then((result) => {
-      const bookmarks = urls.map((url) => {
-        const storedBookmark = result.find((r) => r.url === url.url);
-
-        if (storedBookmark) {
-          return storedBookmark;
-        }
-
-        return url;
-      });
-      setBookmarks(bookmarks);
-    });
-  }, [urls, reloadFlag]);
+    getBookmarksByUrls();
+    setLastUpdateMeans("urls");
+  }, [urls]);
 
   useEffect(() => {
-    db.getBookmarksWithTagsByTag(tags).then((result) => {
-      setBookmarks(result);
-    });
+    getBookmarksByTags();
+    setLastUpdateMeans("tags");
   }, [tags]);
 
   useEffect(() => {
-    db.getBookamrksByTagAlias(tagAlias).then((result) => {
-      setBookmarks(result);
-    });
+    getBookmarksByTagAlias();
+    setLastUpdateMeans("alias");
   }, [tagAlias]);
 
   const addTag = async (tag: string, bookmark: BookmarkWithTags) => {
     await db.addTag(tag, bookmark);
-    setReloadFlag(!reloadFlag);
+    switch (lastUpdateMeans) {
+      case "urls":
+        getBookmarksByUrls();
+        setLastUpdateMeans("urls");
+      case "tags":
+        getBookmarksByTags();
+        setLastUpdateMeans("tags");
+      case "alias":
+        getBookmarksByTagAlias();
+        setLastUpdateMeans("alias");
+      default:
+    }
   };
 
   const removeTag = async (tag: string, bookmark: BookmarkWithTags) => {
     await db.removeTag(tag, bookmark);
-    setReloadFlag(!reloadFlag);
+    switch (lastUpdateMeans) {
+      case "urls":
+        getBookmarksByUrls();
+        setLastUpdateMeans("urls");
+      case "tags":
+        getBookmarksByTags();
+        setLastUpdateMeans("tags");
+      case "alias":
+        getBookmarksByTagAlias();
+        setLastUpdateMeans("alias");
+      default:
+    }
   };
 
   return {

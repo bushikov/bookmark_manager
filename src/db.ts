@@ -68,7 +68,9 @@ class MyDB extends Dexie {
     );
   }
 
-  async getBookmarksWithTagsByTag(tags: string[]): Promise<BookmarkWithTags[]> {
+  async getBookmarksWithTagsByTags(
+    tags: string[]
+  ): Promise<BookmarkWithTags[]> {
     return this.transaction(
       "r",
       [this.bookmarks, this.bookmarkTagRelationship],
@@ -163,7 +165,7 @@ class MyDB extends Dexie {
     });
   }
 
-  async getBookamrksByTagAlias(alias: TagAlias | null): Promise<Bookmark[]> {
+  async getBookmarksByTagAlias(alias: TagAlias | null): Promise<Bookmark[]> {
     return this.transaction(
       "r",
       [this.tagAliases, this.bookmarkTagRelationship, this.bookmarks],
