@@ -35,7 +35,7 @@ export const Form: React.FC<FormProps> = ({
         <div className="w-24">Alias Name</div>
         <input
           type="text"
-          className="flex-grow px-2 rounded bg-gray-100 shadow-inner focus:ring focus:outline-none"
+          className="flex-grow px-2 py-1 rounded bg-gray-100 shadow-inner focus:ring focus:outline-none"
           value={aliasName}
           onChange={(e) => {
             setAliasName(e.target.value);
@@ -45,7 +45,7 @@ export const Form: React.FC<FormProps> = ({
       <label className="flex flex-row">
         <div className="w-24">Type</div>
         <select
-          className="px-2 rounded bg-gray-100 shadow-inner focus:ring focus:outline-none"
+          className="px-2 py-1 rounded bg-gray-100 shadow-inner focus:ring focus:outline-none"
           value={type}
           onChange={(e) => {
             setType(e.target.value as AliasType);
@@ -60,7 +60,7 @@ export const Form: React.FC<FormProps> = ({
         <div className="w-24">Tags</div>
         <input
           type="text"
-          className="flex-grow px-2 rounded bg-gray-100 shadow-inner focus:ring focus:outline-none"
+          className="flex-grow px-2 py-1 rounded bg-gray-100 shadow-inner focus:ring focus:outline-none"
           value={tags}
           onChange={(e) => {
             setTags(e.target.value);

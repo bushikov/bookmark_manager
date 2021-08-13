@@ -63,7 +63,7 @@ export const UrlCard: React.FC<UrlCardProps> = ({
         <div className="w-full relative">
           <input
             type="text"
-            className="px-2 rounded bg-gray-100 shadow-inner focus:ring focus:outline-none w-full"
+            className="px-2 py-1 rounded bg-gray-100 shadow-inner focus:ring focus:outline-none w-full"
             value={text}
             onChange={(e) => {
               setText(e.target.value);
