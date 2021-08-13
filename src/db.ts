@@ -194,14 +194,17 @@ class MyDB extends Dexie {
             const bookmarkIdsOnTag = await this.bookmarkTagRelationship
               .where("tagName")
               .anyOfIgnoreCase(storedTagAlias.tags)
-              .toArray((records) =>
-                records.reduce((acc, record) => {
+              .toArray((records) => {
+                if (records.length === 0) return {};
+                return records.reduce((acc, record) => {
                   acc[record.tagName] ||= [];
                   acc[record.tagName].push(record.bookmarkId);
                   return acc;
-                }, {})
-              );
+                }, {});
+              });
 
+            if (Object.keys(bookmarkIdsOnTag).length === 0)
+              return Promise.resolve([]);
             // 積集合(intersection)を算出する
             bookmarkIds = Object.values(bookmarkIdsOnTag).reduce(
               (acc: number[], ids: number[]) => {
