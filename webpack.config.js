@@ -65,3 +65,6 @@ module.exports = {
   },
   target: ["web", "es5"],
 }
+
+// ソースマップ必要な時
+// module.exports.devtool = "inline-source-map";
