@@ -5,12 +5,13 @@ type FormProps = {
   initialAliasName: string;
   initialType: AliasType;
   initialTags: string;
-  onSubmit: (arg0: {
-    aliasName: string;
+  onSubmit: (arg0: { name: string; type: AliasType; tags: string[] }) => void;
+  onCancel: () => void;
+  validate: (arg0: {
+    name: string;
     type: AliasType;
     tags: string[];
-  }) => void;
-  onCancel: () => void;
+  }) => boolean;
 };
 
 export const Form: React.FC<FormProps> = ({
@@ -19,6 +20,7 @@ export const Form: React.FC<FormProps> = ({
   initialTags,
   onSubmit,
   onCancel,
+  validate,
 }) => {
   const [aliasName, setAliasName] = useState<string>(initialAliasName);
   const [type, setType] = useState<AliasType>(initialType);
@@ -51,7 +53,6 @@ export const Form: React.FC<FormProps> = ({
             setType(e.target.value as AliasType);
           }}
         >
-          <option value="rename">RENAME</option>
           <option value="and">AND</option>
           <option value="or">OR</option>
         </select>
@@ -71,14 +72,15 @@ export const Form: React.FC<FormProps> = ({
         <button
           className="rounded shadow-md focus:shadow-inner px-4 py-2 bg-gray-100 hover:bg-gray-200"
           onClick={() => {
-            onSubmit({
-              aliasName,
+            const params = {
+              name: aliasName,
               type,
               tags: tags
                 .trim()
                 .replace(/\s{2,}/g, " ")
                 .split(/,|\s/),
-            });
+            };
+            if (validate(params)) onSubmit(params);
           }}
         >
           OK

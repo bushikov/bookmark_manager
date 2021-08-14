@@ -4,245 +4,158 @@ export type Bookmark = {
   id?: number;
   url: string;
   title: string;
-  favicon?: Object;
+  favIcon?: Object;
   favIconUrl: string;
+  tags?: Set<string>;
 };
 
-type BookmarkTagRelationship = {
+export type Tag = {
   id?: number;
-  tagName: string;
-  bookmarkId: number;
+  name: string;
+  bookmarkIds: Set<number>;
 };
 
-export type AliasType = "rename" | "and" | "or";
+export type AliasType = "and" | "or";
 
 export type TagAlias = {
-  aliasName: string;
+  name: string;
   type: AliasType;
-  tags: string[];
+  tags: Set<string>;
 };
-
-export type BookmarkWithTags = Bookmark & { tags: string[] };
 
 class MyDB extends Dexie {
   bookmarks: Dexie.Table<Bookmark, number>;
-  bookmarkTagRelationship: Dexie.Table<BookmarkTagRelationship, number>;
+  tags: Dexie.Table<Tag, number>;
   tagAliases: Dexie.Table<TagAlias, string>;
 
   constructor() {
     super("MYDB");
     this.version(1).stores({
       bookmarks: "++id,&url,title",
-      bookmarkTagRelationship: "++id,tagName,bookmarkId,&[tagName+bookmarkId]",
-      tagAliases: "aliasName",
+      tags: "++id,&name",
+      tagAliases: "name",
     });
   }
 
-  async addTag(tag: string, bookmark: BookmarkWithTags): Promise<void> {
-    return this.transaction(
-      "rw",
-      [this.bookmarks, this.bookmarkTagRelationship],
-      async () => {
-        const storedBookmark = await this.bookmarks.get({ url: bookmark.url });
-        let bookmarkId: number;
-        if (!storedBookmark) {
-          bookmarkId = await this.bookmarks.add({
-            url: bookmark.url,
-            title: bookmark.title,
-            favIconUrl: bookmark.favIconUrl,
-          });
-        } else {
-          bookmarkId = storedBookmark.id;
-        }
+  addTag(tagName: string, bookmark: Bookmark): Promise<void> {
+    return this.transaction("rw", [this.bookmarks, this.tags], async () => {
+      const tagsToPut = bookmark.tags
+        ? bookmark.tags
+        : (new Set() as Set<string>);
+      const bookmarkToPut = {
+        ...bookmark,
+        tags: new Set([...tagsToPut, tagName]),
+      };
+      const bookmarkId = await this.bookmarks.put(bookmarkToPut);
 
-        await this.bookmarkTagRelationship
-          .put({
-            tagName: tag,
-            bookmarkId,
-          })
-          .catch((e) => {
-            // 重複したタグ登録のとき
-            console.log(e);
-          });
-      }
-    );
-  }
-
-  async getBookmarksWithTagsByTags(
-    tags: string[]
-  ): Promise<BookmarkWithTags[]> {
-    return this.transaction(
-      "r",
-      [this.bookmarks, this.bookmarkTagRelationship],
-      async () => {
-        const bookmarkIds = await this.bookmarkTagRelationship
-          .where("tagName")
-          // .equals(tag)
-          .anyOfIgnoreCase(tags)
-          .toArray((records) => records.map((record) => record.bookmarkId));
-
-        const bookmarks = await this.bookmarks.bulkGet(bookmarkIds);
-        const urls = bookmarks.map((bookmark) => bookmark.url);
-
-        return await this.getBookmarksWithTagsByUrls(urls);
-      }
-    );
-  }
-
-  async getBookmarksWithTagsByUrls(
-    urls: string[]
-  ): Promise<BookmarkWithTags[]> {
-    return this.transaction(
-      "r",
-      [this.bookmarks, this.bookmarkTagRelationship],
-      async () => {
-        const bookmarks = await this.bookmarks
-          .where("url")
-          .anyOf(urls)
-          .toArray();
-
-        const bookmarkIds = bookmarks.map((b) => b.id);
-        const bookmarkTagRelationship = await this.bookmarkTagRelationship
-          .where("bookmarkId")
-          .anyOf(bookmarkIds)
-          .toArray();
-
-        return bookmarks.map((b) => {
-          return {
-            id: b.id,
-            url: b.url,
-            title: b.title,
-            favIconUrl: b.favIconUrl,
-            tags: bookmarkTagRelationship
-              .filter((btr) => btr.bookmarkId === b.id)
-              .map((btr) => btr.tagName),
-          };
-        });
-      }
-    );
-  }
-
-  async removeTag(tag: string, bookmark: BookmarkWithTags): Promise<void> {
-    return this.transaction(
-      "rw",
-      [this.bookmarks, this.bookmarkTagRelationship],
-      async () => {
-        await this.bookmarkTagRelationship
-          .where("bookmarkId")
-          .equals(bookmark.id)
-          .and((btr) => btr.tagName === tag)
-          .delete();
-
-        const relationship = await this.bookmarkTagRelationship
-          .where("bookmarkId")
-          .equals(bookmark.id)
-          .toArray();
-
-        if (relationship.length === 0) {
-          await this.bookmarks.where("id").equals(bookmark.id).delete();
-        }
-      }
-    );
-  }
-
-  async getTags(texts: string[]): Promise<string[]> {
-    return this.transaction("r", this.bookmarkTagRelationship, async () => {
-      return await this.bookmarkTagRelationship
-        .where("tagName")
-        .startsWithAnyOfIgnoreCase(texts)
-        .toArray((records) =>
-          Array.from(new Set(records.map((record) => record.tagName)))
-        );
+      const tag = await this.tags.get({ name: tagName });
+      const newBookmarkIds: Set<number> = tag
+        ? new Set([...tag.bookmarkIds, bookmarkId])
+        : new Set([bookmarkId]);
+      const tagToPut = tag
+        ? { ...tag, bookmarkIds: newBookmarkIds }
+        : { name: tagName, bookmarkIds: newBookmarkIds };
+      await this.tags.put(tagToPut);
     });
   }
 
-  async getAliases(texts: string[]): Promise<TagAlias[]> {
-    return this.transaction("r", this.tagAliases, async () => {
-      return await this.tagAliases
-        .where("aliasName")
-        .startsWithAnyOfIgnoreCase(texts)
-        .toArray();
-    });
-  }
-
-  async getBookmarksByTagAlias(alias: TagAlias | null): Promise<Bookmark[]> {
-    return this.transaction(
-      "r",
-      [this.tagAliases, this.bookmarkTagRelationship, this.bookmarks],
-      async () => {
-        if (!alias) return Promise.resolve([]);
-        const storedTagAlias = await this.tagAliases.get(alias.aliasName);
-        if (!storedTagAlias) return Promise.resolve([]);
-
-        let bookmarkIds;
-        let urls;
-        switch (storedTagAlias.type) {
-          case "rename":
-          case "or":
-            bookmarkIds = await this.bookmarkTagRelationship
-              .where("tagName")
-              .anyOfIgnoreCase(storedTagAlias.tags)
-              .toArray((records) => records.map((record) => record.bookmarkId));
-
-            urls = await this.bookmarks
-              .where("id")
-              .anyOf(bookmarkIds)
-              .toArray((records) => records.map((record) => record.url));
-
-            return await this.getBookmarksWithTagsByUrls(urls);
-          case "and":
-            const bookmarkIdsOnTag = await this.bookmarkTagRelationship
-              .where("tagName")
-              .anyOfIgnoreCase(storedTagAlias.tags)
-              .toArray((records) => {
-                if (records.length === 0) return {};
-                return records.reduce((acc, record) => {
-                  acc[record.tagName] ||= [];
-                  acc[record.tagName].push(record.bookmarkId);
-                  return acc;
-                }, {});
-              });
-
-            if (Object.keys(bookmarkIdsOnTag).length === 0)
-              return Promise.resolve([]);
-            // 積集合(intersection)を算出する
-            bookmarkIds = Object.values(bookmarkIdsOnTag).reduce(
-              (acc: number[], ids: number[]) => {
-                return acc.filter((a) => ids.includes(a));
-              }
-            );
-
-            urls = await this.bookmarks
-              .where("id")
-              .anyOf(bookmarkIds)
-              .toArray((records) => records.map((record) => record.url));
-
-            return await this.getBookmarksWithTagsByUrls(urls);
-        }
+  removeTag(tagName: string, bookmark: Bookmark): Promise<void> {
+    return this.transaction("rw", [this.bookmarks, this.tags], async () => {
+      const tag = await this.tags.get({ name: tagName });
+      const newBookmarkIds = new Set([...tag.bookmarkIds]);
+      newBookmarkIds.delete(bookmark.id);
+      if (newBookmarkIds.size === 0) {
+        await this.tags.delete(tag.id);
+      } else {
+        await this.tags.put({ ...tag, bookmarkIds: newBookmarkIds });
       }
-    );
-  }
 
-  async getTagsByAlias(alias: TagAlias | null): Promise<string[]> {
-    return this.transaction("r", this.tagAliases, async () => {
-      if (!alias) return Promise.resolve([]);
-
-      const record = await this.tagAliases.get(alias);
-      if (!record) return Promise.resolve([]);
-      return Promise.resolve(record.tags);
+      const storedBookmark = await this.bookmarks.get({ id: bookmark.id });
+      const newTags = new Set([...storedBookmark.tags]);
+      newTags.delete(tagName);
+      if (newTags.size === 0) {
+        await this.bookmarks.delete(bookmark.id);
+      } else {
+        await this.bookmarks.put({ ...storedBookmark, tags: newTags });
+      }
     });
   }
 
-  async putAlias(alias: TagAlias): Promise<void> {
-    return this.transaction("rw", this.tagAliases, async () => {
-      await this.tagAliases.put(alias);
-    });
+  getBookmarksByUrls(urls: string[]): Promise<Bookmark[]> {
+    return this.bookmarks.where("url").anyOf(urls).toArray();
+  }
+
+  async getBookmarksByTags(tags: Set<string>): Promise<Bookmark[]> {
+    const bookmarkIds = await this.tags
+      .where("name")
+      .anyOfIgnoreCase([...tags])
+      .toArray((records) =>
+        records.reduce((acc, record) => {
+          record.bookmarkIds.forEach((bookmarkId) => acc.add(bookmarkId));
+          return acc;
+        }, new Set() as Set<number>)
+      );
+
+    return this.bookmarks.bulkGet([...bookmarkIds]);
+  }
+
+  async getBookmarksByTagAlias(tagAlias: TagAlias): Promise<Bookmark[]> {
+    const tagNames = await this.getTagNamesByTagAlias(tagAlias.name);
+
+    switch (tagAlias.type) {
+      case "and":
+        return this.bookmarks.bulkGet([
+          ...(await this.getBookmarkIdsHavingAllTags(tagNames)),
+        ]);
+      case "or":
+        return this.getBookmarksByTags(tagNames);
+    }
+  }
+
+  async putAlias(tagAlias: TagAlias): Promise<void> {
+    this.tagAliases.put(tagAlias);
   }
 
   async removeAlias(aliasName: string): Promise<void> {
-    return this.transaction("rw", this.tagAliases, async () => {
-      await this.tagAliases.delete(aliasName);
-    });
+    this.tagAliases.delete(aliasName);
+  }
+
+  searchTags(texts: string[]): Promise<Tag[]> {
+    return this.tags.where("name").startsWithAnyOfIgnoreCase(texts).toArray();
+  }
+
+  searchAliases(texts: string[]): Promise<TagAlias[]> {
+    return this.tagAliases
+      .where("name")
+      .startsWithAnyOfIgnoreCase(texts)
+      .toArray();
+  }
+
+  private async getTagNamesByTagAlias(aliasName: string): Promise<Set<string>> {
+    const tagAlias = await this.tagAliases.get(aliasName);
+    if (!tagAlias) return new Set([]);
+    return tagAlias.tags;
+  }
+
+  private async getBookmarkIdsHavingAllTags(
+    tagNames: Set<string>
+  ): Promise<Set<number>> {
+    if (tagNames.size === 0) return new Set() as Set<number>;
+
+    const tags = await this.tags
+      .where("name")
+      .anyOfIgnoreCase([...tagNames])
+      .toArray();
+
+    return tags
+      .map((tag) => tag.bookmarkIds)
+      .reduce((acc, ids) => {
+        const intersection = new Set() as Set<number>;
+        ids.forEach((id) => {
+          if (acc.has(id)) intersection.add(id);
+        });
+        return intersection;
+      });
   }
 }
 

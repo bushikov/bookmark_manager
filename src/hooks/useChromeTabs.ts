@@ -6,11 +6,11 @@ const getChromeTabs = async (windowId: number): Promise<chrome.tabs.Tab[]> => {
 };
 
 type ChromeTabs = {
-  urls: Bookmark[] | [];
+  urls: Bookmark[];
   setTargetWindowId: (arg0?: number | null) => void;
 };
 
-const initialChromeTabs: Bookmark[] | [] = [];
+const initialChromeTabs: Bookmark[] = [];
 
 export const useChromeTabs = (): ChromeTabs => {
   const [targetWindowId, setTargetWindowId] = useState<number | null>(null);

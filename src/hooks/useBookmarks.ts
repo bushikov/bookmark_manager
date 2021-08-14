@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import db, { BookmarkWithTags, TagAlias } from "db";
+import db, { Bookmark, TagAlias } from "db";
 
 export const useBookmarks = () => {
   const [urls, setUrls] = useState([]);
-  const [tags, setTags] = useState([""]);
+  const [tags, setTags] = useState<Set<string>>(new Set());
   const [tagAlias, setTagAlias] = useState<TagAlias | null>(null);
   const [bookmarks, setBookmarks] = useState([]);
   const [lastUpdateMeans, setLastUpdateMeans] = useState<
@@ -11,7 +11,7 @@ export const useBookmarks = () => {
   >(null);
 
   const getBookmarksByUrls = async () => {
-    const records = await db.getBookmarksWithTagsByUrls(urls.map((u) => u.url));
+    const records = await db.getBookmarksByUrls(urls.map((u) => u.url));
     const bookmarks = urls.map((url) => {
       const storedBookmark = records.find((record) => record.url === url.url);
       if (storedBookmark) return storedBookmark;
@@ -21,11 +21,12 @@ export const useBookmarks = () => {
   };
 
   const getBookmarksByTags = async () => {
-    const bookmarks = await db.getBookmarksWithTagsByTags(tags);
+    const bookmarks = await db.getBookmarksByTags(tags);
     setBookmarks(bookmarks);
   };
 
   const getBookmarksByTagAlias = async () => {
+    if (!tagAlias) return setBookmarks([]);
     const bookmarks = await db.getBookmarksByTagAlias(tagAlias);
     setBookmarks(bookmarks);
   };
@@ -45,34 +46,41 @@ export const useBookmarks = () => {
     setLastUpdateMeans("alias");
   }, [tagAlias]);
 
-  const addTag = async (tag: string, bookmark: BookmarkWithTags) => {
+  const addTag = async (tag: string, bookmark: Bookmark) => {
+    if (!tag) return;
     await db.addTag(tag, bookmark);
     switch (lastUpdateMeans) {
       case "urls":
         getBookmarksByUrls();
         setLastUpdateMeans("urls");
+        break;
       case "tags":
         getBookmarksByTags();
         setLastUpdateMeans("tags");
+        break;
       case "alias":
         getBookmarksByTagAlias();
         setLastUpdateMeans("alias");
+        break;
       default:
     }
   };
 
-  const removeTag = async (tag: string, bookmark: BookmarkWithTags) => {
+  const removeTag = async (tag: string, bookmark: Bookmark) => {
     await db.removeTag(tag, bookmark);
     switch (lastUpdateMeans) {
       case "urls":
         getBookmarksByUrls();
         setLastUpdateMeans("urls");
+        break;
       case "tags":
         getBookmarksByTags();
         setLastUpdateMeans("tags");
+        break;
       case "alias":
         getBookmarksByTagAlias();
         setLastUpdateMeans("alias");
+        break;
       default:
     }
   };

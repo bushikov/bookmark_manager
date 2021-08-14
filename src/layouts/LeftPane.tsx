@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useChromeWindows, useTags } from "hooks";
 import { TabHeader } from "components/TabHeader";
 import { TitleCard } from "components/TitleCard";
@@ -49,13 +49,13 @@ const WindowList: React.FC<WindowListProps> = ({ onWindowSelect }) => {
 };
 
 const initialTagAlias: TagAlias = {
-  aliasName: "",
-  type: "rename",
-  tags: [],
+  name: "",
+  type: "and",
+  tags: new Set(),
 };
 
 type TagListProps = {
-  onTagSelect: (arg0: string[]) => void;
+  onTagSelect: (arg0: Set<string>) => void;
   onTagAliasSelect: (arg0: TagAlias) => void;
 };
 
@@ -70,6 +70,16 @@ const TagList: React.FC<TagListProps> = ({ onTagSelect, onTagAliasSelect }) => {
   const [targetTagAlias, setTargetTagAlias] = useState<TagAlias>(
     initialTagAlias
   );
+  const [tagLabels, setTagLabels] = useState<string[]>([]);
+  const [tagAliaseLabels, setTagAliaseLabels] = useState<string[]>([]);
+
+  useEffect(() => {
+    setTagLabels(tags.map((tag) => tag.name));
+  }, [tags]);
+
+  useEffect(() => {
+    setTagAliaseLabels(tagAliases.map((alias) => alias.name));
+  }, [tagAliases]);
 
   return (
     <>
@@ -90,31 +100,29 @@ const TagList: React.FC<TagListProps> = ({ onTagSelect, onTagAliasSelect }) => {
       <div className="space-y-4">
         <Accordion
           title="Tag"
-          labels={tags}
+          labels={tagLabels}
           isFocus={focusedComponent === "tag"}
           onSelect={(label) => {
             setFocusedComponent("tag");
-            onTagSelect([label]);
+            onTagSelect(new Set([label]));
           }}
         />
         <FunctionalAccordion
           title="Tag alias"
-          labels={tagAliases.map((alias) => alias.aliasName)}
+          labels={tagAliaseLabels}
           isFocus={focusedComponent == "alias"}
           onSelect={(label) => {
             setFocusedComponent("alias");
             // 新しくオブジェクトを作成しているのは、useEffectを毎回動作させたいため
             onTagAliasSelect({
-              ...tagAliases.find((alias) => alias.aliasName === label),
+              ...tagAliases.find((alias) => alias.name === label),
             });
           }}
           onAdd={() => {
             setIsFormOn(true);
           }}
           onEdit={(label) => {
-            setTargetTagAlias(
-              tagAliases.find((alias) => alias.aliasName === label)
-            );
+            setTargetTagAlias(tagAliases.find((alias) => alias.name === label));
             setIsFormOn(true);
             setFocusedComponent("alias");
           }}
@@ -129,16 +137,22 @@ const TagList: React.FC<TagListProps> = ({ onTagSelect, onTagAliasSelect }) => {
             }}
           >
             <Form
-              initialAliasName={targetTagAlias.aliasName}
+              initialAliasName={targetTagAlias.name}
               initialType={targetTagAlias.type}
-              initialTags={targetTagAlias.tags.join(" ")}
+              initialTags={[...targetTagAlias.tags].join(" ")}
               onSubmit={(alias) => {
-                addAlias(alias);
+                addAlias({ ...alias, tags: new Set(alias.tags) });
                 setIsFormOn(false);
               }}
               onCancel={() => {
                 setIsFormOn(false);
                 setTargetTagAlias(initialTagAlias);
+              }}
+              validate={({ name, type, tags }) => {
+                if (name.trim() === "") return false;
+                if (!["and", "or"].includes(type)) return false;
+                if (tags.length === 0 || new Set(tags).has("")) return false;
+                return true;
               }}
             />
           </div>
@@ -153,7 +167,7 @@ const TabLabels = ["Window", "Tag"];
 type LeftPaneProps = {
   height: number;
   onWindowSelect: (arg0: number) => void;
-  onTagSelect: (arg0: string[]) => void;
+  onTagSelect: (arg0: Set<string>) => void;
   onTabChange: () => void;
   onTagAliasSelect: (arg0: TagAlias) => void;
 };
