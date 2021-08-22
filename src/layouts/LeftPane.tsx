@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useChromeWindows, useTags } from "hooks";
+import { useChromeWindows, useTags, useTagAliases } from "hooks";
 import { TabHeader } from "components/TabHeader";
 import { TitleCard } from "components/TitleCard";
 import { Accordion, FunctionalAccordion } from "components/Accordion";
@@ -60,9 +60,8 @@ type TagListProps = {
 };
 
 const TagList: React.FC<TagListProps> = ({ onTagSelect, onTagAliasSelect }) => {
-  const { tags, tagAliases, setTexts, addAlias, removeAlias } = useTags({
-    base: "all",
-  });
+  const { tags, setSearchingWords } = useTags();
+  const { tagAliases, putTagAlias, removeTagAlias } = useTagAliases();
   const [focusedComponent, setFocusedComponent] = useState<"tag" | "alias">(
     "tag"
   );
@@ -88,7 +87,7 @@ const TagList: React.FC<TagListProps> = ({ onTagSelect, onTagAliasSelect }) => {
           type="text"
           className="px-2 py-1 rounded bg-gray-100 shadow-inner focus:ring focus:outline-none w-full text-base"
           onChange={(e) => {
-            setTexts(
+            setSearchingWords(
               e.target.value
                 .trim()
                 .replace(/\s{2,}/g, " ")
@@ -126,7 +125,7 @@ const TagList: React.FC<TagListProps> = ({ onTagSelect, onTagAliasSelect }) => {
             setIsFormOn(true);
             setFocusedComponent("alias");
           }}
-          onDelete={(label) => removeAlias(label)}
+          onDelete={(label) => removeTagAlias(label)}
         />
         {isFormOn && (
           <div
@@ -141,7 +140,7 @@ const TagList: React.FC<TagListProps> = ({ onTagSelect, onTagAliasSelect }) => {
               initialType={targetTagAlias.type}
               initialTags={[...targetTagAlias.tags].join(" ")}
               onSubmit={(alias) => {
-                addAlias({ ...alias, tags: new Set(alias.tags) });
+                putTagAlias({ ...alias, tags: new Set(alias.tags) });
                 setIsFormOn(false);
               }}
               onCancel={() => {

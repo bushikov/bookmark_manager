@@ -6,14 +6,7 @@ import { RightPane } from "layouts/RightPane";
 const App: React.FC<{}> = () => {
   const windowHeight = useWindowHeight();
   const { urls, setTargetWindowId } = useChromeTabs();
-  const {
-    bookmarks,
-    setUrls,
-    setTags,
-    setTagAlias,
-    addTag,
-    removeTag,
-  } = useBookmarks();
+  const { bookmarks, setUrls, setTags, setTagAlias } = useBookmarks();
 
   useEffect(() => {
     setUrls(urls);
@@ -32,8 +25,6 @@ const App: React.FC<{}> = () => {
         <RightPane
           height={windowHeight}
           bookmarks={bookmarks}
-          addTag={addTag}
-          removeTag={removeTag}
           reflashFlg={urls}
         />
       </div>

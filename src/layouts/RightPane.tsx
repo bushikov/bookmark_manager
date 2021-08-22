@@ -6,19 +6,15 @@ import { Bookmark } from "db";
 type RightPaneProps = {
   height: number;
   bookmarks: Bookmark[];
-  addTag: (arg0: string, arg1: Bookmark) => void;
-  removeTag: (arg0: string, arg1: Bookmark) => void;
   reflashFlg: any;
 };
 
 export const RightPane: React.FC<RightPaneProps> = ({
   height,
   bookmarks,
-  addTag,
-  removeTag,
   reflashFlg,
 }) => {
-  const { tags, setTexts } = useTags({ base: "all" });
+  const { tags, addTag, removeTag, setSearchingWords } = useTags();
   const [tagLabels, setTagLabels] = useState<string[]>([]);
 
   useEffect(() => {
@@ -48,15 +44,15 @@ export const RightPane: React.FC<RightPaneProps> = ({
               tags={bookmark.tags ? [...bookmark.tags] : []}
               tagCandidates={tagLabels}
               onAdd={(tag) => {
-                setTexts([]);
+                setSearchingWords([]);
                 addTag(tag, bookmark);
               }}
               onDelete={(tag) => {
-                setTexts([]);
+                setSearchingWords([]);
                 removeTag(tag, bookmark);
               }}
               onChange={(text) => {
-                setTexts([text]);
+                setSearchingWords([text]);
               }}
             />
           </div>

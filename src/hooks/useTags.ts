@@ -1,45 +1,36 @@
 import { useState, useEffect } from "react";
-import db, { Tag, TagAlias } from "db";
+import db, { Bookmark, Tag } from "db";
+import { useBookmarksUpdateSwitch, useTagsUpdateSwitch } from "hooks";
 
-type UseTagsProps = {
-  base: "all" | "nothing";
-};
-
-export const useTags = ({ base }: UseTagsProps) => {
-  const [texts, setTexts] = useState<string[]>([""]);
+export const useTags = () => {
   const [tags, setTags] = useState<Tag[]>([]);
-  const [tagAliases, setTagAliases] = useState<TagAlias[]>([]);
+  const [searchingWords, setSearchingWords] = useState<string[]>([""]);
+
+  const { switchState: switchBookmarkState } = useBookmarksUpdateSwitch();
+  const { updateState, switchState: switchTagsState } = useTagsUpdateSwitch();
+
+  const addTag = async (tag: string, bookmark: Bookmark) => {
+    await db.addTag(tag, bookmark);
+    switchBookmarkState();
+    switchTagsState();
+  };
+
+  const removeTag = async (tag: string, bookmark: Bookmark) => {
+    await db.removeTag(tag, bookmark);
+    switchBookmarkState();
+    switchTagsState();
+  };
 
   useEffect(() => {
-    if (texts.length === 1 && texts[0] === "" && base === "nothing") {
-      setTags([]);
-    } else {
-      db.searchTags(texts).then((result) => {
-        setTags(result);
-      });
-      db.searchAliases(texts).then((result) => {
-        setTagAliases(result);
-      });
-    }
-  }, [texts]);
-
-  const addAlias = async (alias: TagAlias) => {
-    await db.putAlias(alias);
-    const aliases = await db.searchAliases(texts);
-    setTagAliases(aliases);
-  };
-
-  const removeAlias = async (aliasName: string) => {
-    await db.removeAlias(aliasName);
-    const aliases = await db.searchAliases(texts);
-    setTagAliases(aliases);
-  };
+    (async () => {
+      setTags(await db.searchTags(searchingWords));
+    })();
+  }, [searchingWords, updateState]);
 
   return {
     tags,
-    tagAliases,
-    setTexts,
-    addAlias,
-    removeAlias,
+    addTag,
+    removeTag,
+    setSearchingWords,
   };
 };
