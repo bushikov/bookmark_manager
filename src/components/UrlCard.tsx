@@ -74,6 +74,14 @@ export const UrlCard: React.FC<UrlCardProps> = ({
               // 候補クリック前に候補が非表示にならないように
               setTimeout(() => setIsFocused(false), 100);
             }}
+            onKeyPress={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                onAdd(text);
+                setText("");
+                onChange("");
+              }
+            }}
           />
           {isFocused &&
             addableTagCandidates &&
