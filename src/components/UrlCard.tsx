@@ -39,7 +39,7 @@ export const UrlCard: React.FC<UrlCardProps> = ({
         </a>
       </div>
       {tags && tags.length !== 0 && (
-        <div className="px-4 pt-2 flex flex-row space-x-2">
+        <div className="px-4 pt-2 flex flex-row flex-wrap gap-2">
           {tags.map((tag) => (
             <Tag
               key={tag}
@@ -86,7 +86,7 @@ export const UrlCard: React.FC<UrlCardProps> = ({
           {isFocused &&
             addableTagCandidates &&
             addableTagCandidates.length !== 0 && (
-              <ul className="absolute bg-white w-full border border-gray-200 pl-2 py-1 max-h-32 overflow-y-scroll">
+              <ul className="absolute bg-white w-full border border-gray-200 pl-2 py-1 max-h-28 overflow-y-scroll z-50">
                 {addableTagCandidates.map((tagCandidate) => (
                   <li
                     className="cursor-pointer"
