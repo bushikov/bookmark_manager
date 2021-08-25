@@ -16,6 +16,10 @@ export const RightPane: React.FC<RightPaneProps> = ({
 }) => {
   const { tags, addTag, removeTag, setSearchingWords } = useTags();
   const [tagLabels, setTagLabels] = useState<string[]>([]);
+  const [text, setText] = useState<string>("");
+  const [extractedBookmarks, setExtractedBookmarks] = useState<Bookmark[]>(
+    bookmarks
+  );
 
   useEffect(() => {
     // スクロール位置の初期化
@@ -26,16 +30,38 @@ export const RightPane: React.FC<RightPaneProps> = ({
     setTagLabels(tags.map((tag) => tag.name));
   }, [tags]);
 
+  useEffect(() => {
+    setExtractedBookmarks(
+      bookmarks.filter((b) => {
+        if (text === "") return true;
+        if (b.title.indexOf(text) !== -1) return true;
+        if (b.url.indexOf(text) !== -1) return true;
+        return false;
+      })
+    );
+  }, [text, bookmarks]);
+
   return (
     <div
       id="rightpane"
       className="pt-7 pl-12 pr-4 pb-4 overflow-auto"
       style={{ height }}
     >
-      <p className="text-base">
-        {`${bookmarks.length} ${bookmarks.length === 1 ? "tab" : "tabs"}`}
-      </p>
-      {bookmarks.map((bookmark) => {
+      <div className="pt-8">
+        <input
+          type="text"
+          className="px-2 py-1 rounded bg-gray-100 shadow-inner focus:ring focus:outline-none w-full text-base"
+          onChange={(e) => {
+            setText(e.target.value);
+          }}
+        />
+        <p className="text-base pt-4">
+          {`${extractedBookmarks.length} ${
+            extractedBookmarks.length === 1 ? "tab" : "tabs"
+          }`}
+        </p>
+      </div>
+      {extractedBookmarks.map((bookmark) => {
         return (
           <div className="pt-2">
             <UrlCard
