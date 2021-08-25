@@ -44,6 +44,7 @@ export const RightPane: React.FC<RightPaneProps> = ({
               tags={bookmark.tags ? [...bookmark.tags] : []}
               tagCandidates={tagLabels}
               onAdd={(tag) => {
+                if (tag === "") return;
                 setSearchingWords([]);
                 addTag(tag, bookmark);
               }}
