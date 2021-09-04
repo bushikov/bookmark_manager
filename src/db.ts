@@ -33,7 +33,7 @@ class MyDB extends Dexie {
     this.version(1).stores({
       bookmarks: "++id,&url,title",
       tags: "++id,&name",
-      tagAliases: "name",
+      tagAliases: "++id,&name",
     });
   }
 
@@ -112,11 +112,11 @@ class MyDB extends Dexie {
     }
   }
 
-  async putAlias(tagAlias: TagAlias): Promise<void> {
+  async putTagAlias(tagAlias: TagAlias): Promise<void> {
     this.tagAliases.put(tagAlias);
   }
 
-  async removeAlias(aliasName: string): Promise<void> {
+  async removeTagAlias(aliasName: string): Promise<void> {
     this.tagAliases.delete(aliasName);
   }
 

@@ -14,13 +14,13 @@ export const useTagAliases = () => {
   }, [searchingWords]);
 
   const putTagAlias = async (tagAlias: TagAlias) => {
-    await db.putAlias(tagAlias);
+    await db.putTagAlias(tagAlias);
     // 追加したタグエイリアスもtagAliasesに含まれるように
     setSearchingWords([...searchingWords]);
   };
 
   const removeTagAlias = async (tagAliasName: string) => {
-    await db.removeAlias(tagAliasName);
+    await db.removeTagAlias(tagAliasName);
     // 追加したタグエイリアスもtagAliasesに含まれるように
     setSearchingWords([...searchingWords]);
   };
