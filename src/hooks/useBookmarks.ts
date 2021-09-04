@@ -2,17 +2,45 @@ import { useState, useEffect } from "react";
 import db, { Bookmark, TagAlias } from "db";
 import { useBookmarksUpdateSwitch } from "hooks";
 
-type BookmarkUpdateCondition = {
-  type: "url" | "tag" | "tagAlias" | null;
-  detail?: {
-    urls?: string[];
-    tags?: Set<string>;
-    tagAlias?: TagAlias;
-  };
+// type BookmarkUpdateCondition = {
+//   type: "url" | "tag" | "tagAlias" | null;
+//   // detail?: {
+//   //   urls?: string[];
+//   //   tags?: Set<string>;
+//   //   tagAlias?: TagAlias;
+//   // };
+//   detail?: { urls: string[] } | { tags: Set<string> } | { tagAlias: TagAlias };
+// };
+
+type BookmarkUpdateCondition =
+  | InitialCondition
+  | UrlCondition
+  | TagCondition
+  | TagAliasCondition;
+
+type InitialCondition = {
+  type: null;
+  detail: null;
+};
+
+type UrlCondition = {
+  type: "url";
+  detail: string[];
+};
+
+type TagCondition = {
+  type: "tag";
+  detail: Set<string>;
+};
+
+type TagAliasCondition = {
+  type: "tagAlias";
+  detail: TagAlias;
 };
 
 const initialBookmarkUpdateCondition: BookmarkUpdateCondition = {
   type: null,
+  detail: null,
 };
 
 export const useBookmarks = () => {
@@ -27,16 +55,16 @@ export const useBookmarks = () => {
   const { updateState } = useBookmarksUpdateSwitch();
 
   useEffect(() => {
-    setConditions({ type: "url", detail: { urls: urls.map((u) => u.url) } });
+    setConditions({ type: "url", detail: urls.map((u) => u.url) });
   }, [urls]);
 
   useEffect(() => {
-    setConditions({ type: "tag", detail: { tags } });
+    setConditions({ type: "tag", detail: tags });
   }, [tags]);
 
   useEffect(() => {
     if (!tagAlias) return;
-    setConditions({ type: "tagAlias", detail: { tagAlias } });
+    setConditions({ type: "tagAlias", detail: tagAlias });
   }, [tagAlias]);
 
   useEffect(() => {
@@ -56,14 +84,12 @@ export const useBookmarks = () => {
         break;
       case "tag":
         (async () => {
-          setBookmarks(await db.getBookmarksByTags(conditions.detail.tags));
+          setBookmarks(await db.getBookmarksByTags(conditions.detail));
         })();
         break;
       case "tagAlias":
         (async () => {
-          setBookmarks(
-            await db.getBookmarksByTagAlias(conditions.detail.tagAlias)
-          );
+          setBookmarks(await db.getBookmarksByTagAlias(conditions.detail));
         })();
         break;
       default:

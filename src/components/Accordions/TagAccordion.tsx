@@ -4,7 +4,7 @@ export type TagAccordionProps = {
   title: string;
   labels?: string[];
   isFocus: boolean;
-  onSelect: (args0: string) => void;
+  onSelect: (arg0: string) => void;
 };
 
 export const TagAccordion: React.FC<TagAccordionProps> = ({

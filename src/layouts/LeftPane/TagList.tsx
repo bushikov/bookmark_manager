@@ -68,24 +68,24 @@ export const TagList: React.FC<TagListProps> = ({
         />
         <TagAliasAccordion
           title="Tag alias"
-          labels={tagAliaseLabels}
+          tagAliases={tagAliases}
           isFocus={focusedComponent == "alias"}
-          onSelect={(label) => {
+          onSelect={(tagAlias) => {
             setFocusedComponent("alias");
             // 新しくオブジェクトを作成しているのは、useEffectを毎回動作させたいため
-            onTagAliasSelect({
-              ...tagAliases.find((alias) => alias.name === label),
-            });
+            onTagAliasSelect({ ...tagAlias });
           }}
           onAdd={() => {
             setIsFormOn(true);
           }}
-          onEdit={(label) => {
-            setTargetTagAlias(tagAliases.find((alias) => alias.name === label));
+          onEdit={(tagAlias) => {
+            setTargetTagAlias(tagAlias);
             setIsFormOn(true);
             setFocusedComponent("alias");
           }}
-          onDelete={(label) => removeTagAlias(label)}
+          onDelete={(tagAlias) => {
+            removeTagAlias(tagAlias);
+          }}
         />
         {isFormOn && (
           <div

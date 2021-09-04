@@ -19,8 +19,8 @@ export const useTagAliases = () => {
     setSearchingWords([...searchingWords]);
   };
 
-  const removeTagAlias = async (tagAliasName: string) => {
-    await db.removeTagAlias(tagAliasName);
+  const removeTagAlias = async (tagAlias: TagAlias) => {
+    await db.removeTagAlias(tagAlias);
     // 追加したタグエイリアスもtagAliasesに含まれるように
     setSearchingWords([...searchingWords]);
   };

@@ -1,21 +1,25 @@
 import React, { useState } from "react";
 
-import { TagAccordionProps } from "./TagAccordion";
+import { TagAlias } from "db";
 
-type TagAliasAccordionProps = TagAccordionProps & {
+type TagAliasAccordionProps = {
+  title: string;
+  isFocus: boolean;
+  tagAliases: TagAlias[];
+  onSelect: (tagAlias: TagAlias) => void;
   onAdd: () => void;
-  onEdit: (arg0: string) => void;
-  onDelete: (arg0: string) => void;
+  onEdit: (tagAlias: TagAlias) => void;
+  onDelete: (tagAlias: TagAlias) => void;
 };
 
 export const TagAliasAccordion: React.FC<TagAliasAccordionProps> = ({
   title,
-  labels,
   isFocus,
   onSelect,
   onAdd,
   onEdit,
   onDelete,
+  tagAliases,
 }) => {
   const [isFolded, setIsFolded] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -40,22 +44,22 @@ export const TagAliasAccordion: React.FC<TagAliasAccordionProps> = ({
         </div>
       </div>
       {!isFolded &&
-        labels &&
-        labels.map((label, index) => (
+        tagAliases &&
+        tagAliases.map((tagAlias, index) => (
           <div
-            key={label}
+            key={tagAlias.id}
             className={`border border-gray-200 pl-8 py-2 pr-2 ${
               isFocus && index === selectedIndex ? "bg-gray-100" : "bg-white"
             }`}
           >
             <div className="flex flex-row justify-between">
-              <p className="py-1">{label}</p>
+              <p className="py-1">{tagAlias.name}</p>
               <div className="flex space-x-3">
                 <button
                   className="rounded px-2 py-1 bg-blue-500 text-white hover:bg-blue-700 focus:ring shadow-lg"
                   onClick={() => {
                     setSelectedIndex(null);
-                    onEdit(label);
+                    onEdit(tagAlias);
                   }}
                 >
                   EDIT
@@ -64,7 +68,7 @@ export const TagAliasAccordion: React.FC<TagAliasAccordionProps> = ({
                   className="rounded px-2 py-1 bg-red-500 text-white hover:bg-red-700 focus:ring shadow-lg"
                   onClick={() => {
                     setSelectedIndex(null);
-                    onDelete(label);
+                    onDelete(tagAlias);
                   }}
                 >
                   DELETE
@@ -77,7 +81,7 @@ export const TagAliasAccordion: React.FC<TagAliasAccordionProps> = ({
                   }`}
                   onClick={() => {
                     setSelectedIndex(index);
-                    onSelect(label);
+                    onSelect(tagAlias);
                   }}
                 >
                   SELECT

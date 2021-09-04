@@ -18,6 +18,7 @@ export type Tag = {
 export type AliasType = "and" | "or";
 
 export type TagAlias = {
+  id?: number;
   name: string;
   type: AliasType;
   tags: Set<string>;
@@ -26,7 +27,7 @@ export type TagAlias = {
 class MyDB extends Dexie {
   bookmarks: Dexie.Table<Bookmark, number>;
   tags: Dexie.Table<Tag, number>;
-  tagAliases: Dexie.Table<TagAlias, string>;
+  tagAliases: Dexie.Table<TagAlias, number>;
 
   constructor() {
     super("MYDB");
@@ -35,6 +36,48 @@ class MyDB extends Dexie {
       tags: "++id,&name",
       tagAliases: "++id,&name",
     });
+  }
+
+  getBookmarksByUrls(urls: string[]): Promise<Bookmark[]> {
+    return this.bookmarks.where("url").anyOf(urls).toArray();
+  }
+
+  async getBookmarksByTags(tags: Set<string>): Promise<Bookmark[]> {
+    const bookmarkIds = await this.tags
+      .where("name")
+      .anyOfIgnoreCase([...tags])
+      .toArray((records) =>
+        records.reduce((acc, record) => {
+          record.bookmarkIds.forEach((bookmarkId) => acc.add(bookmarkId));
+          return acc;
+        }, new Set() as Set<number>)
+      );
+
+    return this.bookmarks.bulkGet([...bookmarkIds]);
+  }
+
+  async getBookmarksByTagAlias(tagAlias: TagAlias): Promise<Bookmark[]> {
+    const tagNames = await this.getTagNamesByTagAlias(tagAlias);
+
+    switch (tagAlias.type) {
+      case "and":
+        return this.bookmarks.bulkGet([
+          ...(await this.getBookmarkIdsHavingAllTags(tagNames)),
+        ]);
+      case "or":
+        return this.getBookmarksByTags(tagNames);
+    }
+  }
+
+  searchTags(texts: string[]): Promise<Tag[]> {
+    return this.tags.where("name").startsWithAnyOfIgnoreCase(texts).toArray();
+  }
+
+  searchAliases(texts: string[]): Promise<TagAlias[]> {
+    return this.tagAliases
+      .where("name")
+      .startsWithAnyOfIgnoreCase(texts)
+      .toArray();
   }
 
   addTag(tagName: string, bookmark: Bookmark): Promise<void> {
@@ -81,60 +124,20 @@ class MyDB extends Dexie {
     });
   }
 
-  getBookmarksByUrls(urls: string[]): Promise<Bookmark[]> {
-    return this.bookmarks.where("url").anyOf(urls).toArray();
-  }
-
-  async getBookmarksByTags(tags: Set<string>): Promise<Bookmark[]> {
-    const bookmarkIds = await this.tags
-      .where("name")
-      .anyOfIgnoreCase([...tags])
-      .toArray((records) =>
-        records.reduce((acc, record) => {
-          record.bookmarkIds.forEach((bookmarkId) => acc.add(bookmarkId));
-          return acc;
-        }, new Set() as Set<number>)
-      );
-
-    return this.bookmarks.bulkGet([...bookmarkIds]);
-  }
-
-  async getBookmarksByTagAlias(tagAlias: TagAlias): Promise<Bookmark[]> {
-    const tagNames = await this.getTagNamesByTagAlias(tagAlias.name);
-
-    switch (tagAlias.type) {
-      case "and":
-        return this.bookmarks.bulkGet([
-          ...(await this.getBookmarkIdsHavingAllTags(tagNames)),
-        ]);
-      case "or":
-        return this.getBookmarksByTags(tagNames);
-    }
-  }
-
   async putTagAlias(tagAlias: TagAlias): Promise<void> {
     this.tagAliases.put(tagAlias);
   }
 
-  async removeTagAlias(aliasName: string): Promise<void> {
-    this.tagAliases.delete(aliasName);
+  async removeTagAlias(tagAlias: TagAlias): Promise<void> {
+    this.tagAliases.delete(tagAlias.id);
   }
 
-  searchTags(texts: string[]): Promise<Tag[]> {
-    return this.tags.where("name").startsWithAnyOfIgnoreCase(texts).toArray();
-  }
-
-  searchAliases(texts: string[]): Promise<TagAlias[]> {
-    return this.tagAliases
-      .where("name")
-      .startsWithAnyOfIgnoreCase(texts)
-      .toArray();
-  }
-
-  private async getTagNamesByTagAlias(aliasName: string): Promise<Set<string>> {
-    const tagAlias = await this.tagAliases.get(aliasName);
-    if (!tagAlias) return new Set([]);
-    return tagAlias.tags;
+  private async getTagNamesByTagAlias(
+    tagAlias: TagAlias
+  ): Promise<Set<string>> {
+    const storedTagAlias = await this.tagAliases.get(tagAlias.id);
+    if (!storedTagAlias) return new Set([]);
+    return storedTagAlias.tags;
   }
 
   private async getBookmarkIdsHavingAllTags(
