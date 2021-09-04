@@ -15,9 +15,23 @@ export const TagAliasAccordionDefault = Template.bind({});
 TagAliasAccordionDefault.args = {
   title: "タイトル",
   labels: ["ラベル１", "ラベル２"],
+  tagAliases: [
+    {
+      id: 1,
+      name: "エイリアス１",
+      type: "and",
+      tags: new Set(["タグ１", "タグ２"]),
+    },
+    {
+      id: 2,
+      name: "エイリアス２",
+      type: "or",
+      tags: new Set(["タグ１", "タグ２"]),
+    },
+  ],
   isFocus: true,
-  onSelect: (label) => console.log(label),
+  onSelect: (tagAlias) => console.log(tagAlias),
   onAdd: () => console.log("ADD"),
   onEdit: () => console.log("EDIT"),
-  onDelete: (label) => console.log(label),
+  onDelete: () => console.log("DELETE"),
 };

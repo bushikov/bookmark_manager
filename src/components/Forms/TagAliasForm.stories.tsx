@@ -1,16 +1,18 @@
 import React from "react";
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { Form } from "./Form";
+import { TagAliasForm } from "./TagAliasForm";
 
 export default {
   title: "Component/Form",
-  component: Form,
-} as ComponentMeta<typeof Form>;
+  component: TagAliasForm,
+} as ComponentMeta<typeof TagAliasForm>;
 
-const Template: ComponentStory<typeof Form> = (args) => <Form {...args} />;
+const Template: ComponentStory<typeof TagAliasForm> = (args) => (
+  <TagAliasForm {...args} />
+);
 
-export const FormDefault = Template.bind({});
-FormDefault.args = {
+export const TagAliasFormDefault = Template.bind({});
+TagAliasFormDefault.args = {
   initialAliasName: "",
   initialType: "and",
   initialTags: [],
@@ -18,8 +20,8 @@ FormDefault.args = {
   onCancel: () => console.log("CANCEL"),
 };
 
-export const FormInitialData = Template.bind({});
-FormInitialData.args = {
+export const TagAliasFormInitialData = Template.bind({});
+TagAliasFormInitialData.args = {
   initialAliasName: "エイリアス",
   initialType: "or",
   initialTags: ["タグ１", "タグ２"],

@@ -102,6 +102,25 @@ class MyDB extends Dexie {
     });
   }
 
+  renameTag(newTag: Tag): Promise<void> {
+    return this.transaction(
+      "rw",
+      [this.bookmarks, this.tags, this.tagAliases],
+      async () => {
+        const currentTagName = (await this.tags.get(newTag.id)).name;
+        await this.tags.update(newTag.id, { name: newTag.name });
+
+        const bookmarkIds = (await this.tags.get(newTag.id)).bookmarkIds;
+        bookmarkIds.forEach(async (id) => {
+          const bookmark = await this.bookmarks.get(id);
+          bookmark.tags.delete(currentTagName);
+          bookmark.tags.add(newTag.name);
+          await this.bookmarks.put(bookmark);
+        });
+      }
+    );
+  }
+
   removeTag(tagName: string, bookmark: Bookmark): Promise<void> {
     return this.transaction("rw", [this.bookmarks, this.tags], async () => {
       const tag = await this.tags.get({ name: tagName });

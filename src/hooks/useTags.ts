@@ -15,6 +15,12 @@ export const useTags = () => {
     switchTagsState();
   };
 
+  const renameTag = async (newTag: Tag) => {
+    await db.renameTag(newTag);
+    switchBookmarkState();
+    switchTagsState();
+  };
+
   const removeTag = async (tag: string, bookmark: Bookmark) => {
     await db.removeTag(tag, bookmark);
     switchBookmarkState();
@@ -30,6 +36,7 @@ export const useTags = () => {
   return {
     tags,
     addTag,
+    renameTag,
     removeTag,
     setSearchingWords,
   };

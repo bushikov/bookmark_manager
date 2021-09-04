@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AliasType } from "db";
 
-type FormProps = {
+type TagAliasFormProps = {
   initialAliasName: string;
   initialType: AliasType;
   initialTags: string;
@@ -14,7 +14,7 @@ type FormProps = {
   }) => boolean;
 };
 
-export const Form: React.FC<FormProps> = ({
+export const TagAliasForm: React.FC<TagAliasFormProps> = ({
   initialAliasName,
   initialType,
   initialTags,

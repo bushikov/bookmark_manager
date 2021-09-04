@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 
-import { TagAlias } from "db";
+import { Tag, TagAlias } from "db";
 import { useTags, useTagAliases } from "hooks";
 import { TagAccordion, TagAliasAccordion } from "components/Accordions";
-import { Form } from "components/Form";
+import { TagForm, TagAliasForm } from "components/Forms";
 
 const initialTagAlias: TagAlias = {
   name: "",
@@ -20,25 +20,22 @@ export const TagList: React.FC<TagListProps> = ({
   onTagSelect,
   onTagAliasSelect,
 }) => {
-  const { tags, setSearchingWords } = useTags();
+  const { tags, renameTag, setSearchingWords } = useTags();
   const { tagAliases, putTagAlias, removeTagAlias } = useTagAliases();
   const [focusedComponent, setFocusedComponent] = useState<"tag" | "alias">(
     "tag"
   );
-  const [isFormOn, setIsFormOn] = useState(false);
+  const [isTagFormOn, setIsTagFormOn] = useState(false);
+  const [targetTag, setTargetTag] = useState<Tag | null>(null);
+  const [isTagAliasFormOn, setIsTagAliasFormOn] = useState(false);
   const [targetTagAlias, setTargetTagAlias] = useState<TagAlias>(
     initialTagAlias
   );
   const [tagLabels, setTagLabels] = useState<string[]>([]);
-  const [tagAliaseLabels, setTagAliaseLabels] = useState<string[]>([]);
 
   useEffect(() => {
     setTagLabels(tags.map((tag) => tag.name));
   }, [tags]);
-
-  useEffect(() => {
-    setTagAliaseLabels(tagAliases.map((alias) => alias.name));
-  }, [tagAliases]);
 
   return (
     <>
@@ -59,11 +56,15 @@ export const TagList: React.FC<TagListProps> = ({
       <div className="space-y-4">
         <TagAccordion
           title="Tag"
-          labels={tagLabels}
+          tags={tags}
           isFocus={focusedComponent === "tag"}
           onSelect={(label) => {
             setFocusedComponent("tag");
             onTagSelect(new Set([label]));
+          }}
+          onRename={(tag) => {
+            setTargetTag(tag);
+            setIsTagFormOn(true);
           }}
         />
         <TagAliasAccordion
@@ -76,35 +77,56 @@ export const TagList: React.FC<TagListProps> = ({
             onTagAliasSelect({ ...tagAlias });
           }}
           onAdd={() => {
-            setIsFormOn(true);
+            setIsTagAliasFormOn(true);
           }}
           onEdit={(tagAlias) => {
             setTargetTagAlias(tagAlias);
-            setIsFormOn(true);
+            setIsTagAliasFormOn(true);
             setFocusedComponent("alias");
           }}
           onDelete={(tagAlias) => {
             removeTagAlias(tagAlias);
           }}
         />
-        {isFormOn && (
+        {isTagFormOn && (
           <div
             className="fixed top-0 left-0 right-0 bottom-0 bg-gray-900 bg-opacity-80 p-20 z-50"
             onClick={() => {
-              setIsFormOn(false);
+              setIsTagFormOn(false);
+              setTargetTag(null);
+            }}
+          >
+            <TagForm
+              tag={targetTag}
+              onSubmit={(tag) => {
+                renameTag(tag);
+                setIsTagFormOn(false);
+              }}
+              onCancel={() => {
+                setIsTagFormOn(false);
+                setTargetTag(null);
+              }}
+            />
+          </div>
+        )}
+        {isTagAliasFormOn && (
+          <div
+            className="fixed top-0 left-0 right-0 bottom-0 bg-gray-900 bg-opacity-80 p-20 z-50"
+            onClick={() => {
+              setIsTagAliasFormOn(false);
               setTargetTagAlias(initialTagAlias);
             }}
           >
-            <Form
+            <TagAliasForm
               initialAliasName={targetTagAlias.name}
               initialType={targetTagAlias.type}
               initialTags={[...targetTagAlias.tags].join(" ")}
               onSubmit={(alias) => {
                 putTagAlias({ ...alias, tags: new Set(alias.tags) });
-                setIsFormOn(false);
+                setIsTagAliasFormOn(false);
               }}
               onCancel={() => {
-                setIsFormOn(false);
+                setIsTagAliasFormOn(false);
                 setTargetTagAlias(initialTagAlias);
               }}
               validate={({ name, type, tags }) => {
