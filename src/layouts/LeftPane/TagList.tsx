@@ -1,52 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { useChromeWindows, useTags, useTagAliases } from "hooks";
-import { TabHeader } from "components/TabHeader";
-import { TitleCard } from "components/TitleCard";
+
+import { TagAlias } from "db";
+import { useTags, useTagAliases } from "hooks";
 import { Accordion, FunctionalAccordion } from "components/Accordion";
 import { Form } from "components/Form";
-import { TagAlias } from "db";
-
-type WindowListProps = {
-  onWindowSelect: (id: number) => void;
-};
-
-const WindowList: React.FC<WindowListProps> = ({ onWindowSelect }) => {
-  const { currentWindow, otherWindows } = useChromeWindows();
-  const [pressedWindowIndex, setPressedWindowIndex] = useState<number | null>(
-    null
-  );
-
-  return (
-    <>
-      {currentWindow && (
-        <TitleCard
-          title="Current Window"
-          id={currentWindow.id}
-          onClick={() => {
-            setPressedWindowIndex(0);
-            onWindowSelect(currentWindow.id);
-          }}
-          key={currentWindow.id}
-          onPressed={pressedWindowIndex === 0}
-        />
-      )}
-      {otherWindows.map((otherWindow, index) => (
-        <div className="pt-2">
-          <TitleCard
-            title={`Window${index + 1}`}
-            id={otherWindow.id}
-            onClick={() => {
-              setPressedWindowIndex(index + 1);
-              onWindowSelect(otherWindow.id);
-            }}
-            key={otherWindow.id}
-            onPressed={pressedWindowIndex === index + 1}
-          />
-        </div>
-      ))}
-    </>
-  );
-};
 
 const initialTagAlias: TagAlias = {
   name: "",
@@ -59,7 +16,10 @@ type TagListProps = {
   onTagAliasSelect: (arg0: TagAlias) => void;
 };
 
-const TagList: React.FC<TagListProps> = ({ onTagSelect, onTagAliasSelect }) => {
+export const TagList: React.FC<TagListProps> = ({
+  onTagSelect,
+  onTagAliasSelect,
+}) => {
   const { tags, setSearchingWords } = useTags();
   const { tagAliases, putTagAlias, removeTagAlias } = useTagAliases();
   const [focusedComponent, setFocusedComponent] = useState<"tag" | "alias">(
@@ -158,47 +118,5 @@ const TagList: React.FC<TagListProps> = ({ onTagSelect, onTagAliasSelect }) => {
         )}
       </div>
     </>
-  );
-};
-
-const TabLabels = ["Window", "Tag"];
-
-type LeftPaneProps = {
-  height: number;
-  onWindowSelect: (arg0: number) => void;
-  onTagSelect: (arg0: Set<string>) => void;
-  onTabChange: () => void;
-  onTagAliasSelect: (arg0: TagAlias) => void;
-};
-
-export const LeftPane: React.FC<LeftPaneProps> = ({
-  height,
-  onWindowSelect,
-  onTagSelect,
-  onTabChange,
-  onTagAliasSelect,
-}) => {
-  const [tabIndex, setTabIndex] = useState(0);
-
-  return (
-    <div className="px-4 pb-4 overflow-y-auto" style={{ height }}>
-      <TabHeader
-        labels={TabLabels}
-        onChange={(i) => {
-          onTabChange();
-          setTabIndex(i);
-        }}
-      />
-      <div className="pt-4">
-        {tabIndex === 0 ? (
-          <WindowList onWindowSelect={onWindowSelect} />
-        ) : (
-          <TagList
-            onTagSelect={onTagSelect}
-            onTagAliasSelect={onTagAliasSelect}
-          />
-        )}
-      </div>
-    </div>
   );
 };
