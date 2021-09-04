@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 
 import { TagAlias } from "db";
 import { useTags, useTagAliases } from "hooks";
-import { Accordion, FunctionalAccordion } from "components/Accordion";
+import { TagAccordion, TagAliasAccordion } from "components/Accordions";
 import { Form } from "components/Form";
 
 const initialTagAlias: TagAlias = {
@@ -57,7 +57,7 @@ export const TagList: React.FC<TagListProps> = ({
         />
       </div>
       <div className="space-y-4">
-        <Accordion
+        <TagAccordion
           title="Tag"
           labels={tagLabels}
           isFocus={focusedComponent === "tag"}
@@ -66,7 +66,7 @@ export const TagList: React.FC<TagListProps> = ({
             onTagSelect(new Set([label]));
           }}
         />
-        <FunctionalAccordion
+        <TagAliasAccordion
           title="Tag alias"
           labels={tagAliaseLabels}
           isFocus={focusedComponent == "alias"}
