@@ -13,6 +13,7 @@ export type Tag = {
   id?: number;
   name: string;
   bookmarkIds: Set<number>;
+  tagAliasIds: Set<number>;
 };
 
 export type AliasType = "and" | "or";
@@ -45,7 +46,7 @@ class MyDB extends Dexie {
   async getBookmarksByTags(tags: Set<string>): Promise<Bookmark[]> {
     const bookmarkIds = await this.tags
       .where("name")
-      .anyOfIgnoreCase([...tags])
+      .anyOf([...tags])
       .toArray((records) =>
         records.reduce((acc, record) => {
           record.bookmarkIds.forEach((bookmarkId) => acc.add(bookmarkId));
@@ -97,7 +98,11 @@ class MyDB extends Dexie {
         : new Set([bookmarkId]);
       const tagToPut = tag
         ? { ...tag, bookmarkIds: newBookmarkIds }
-        : { name: tagName, bookmarkIds: newBookmarkIds };
+        : {
+            name: tagName,
+            bookmarkIds: newBookmarkIds,
+            tagAliasIds: new Set([]),
+          };
       await this.tags.put(tagToPut);
     });
   }
@@ -144,11 +149,29 @@ class MyDB extends Dexie {
   }
 
   async putTagAlias(tagAlias: TagAlias): Promise<void> {
-    this.tagAliases.put(tagAlias);
+    return this.transaction("rw", [this.tags, this.tagAliases], async () => {
+      const tagAliasId = await this.tagAliases.put(tagAlias);
+
+      tagAlias.tags.forEach(async (tag) => {
+        const storedTag = await this.tags.get({ name: tag });
+        if (!storedTag) return;
+        storedTag.tagAliasIds.add(tagAliasId);
+        await this.tags.put(storedTag);
+      });
+    });
   }
 
   async removeTagAlias(tagAlias: TagAlias): Promise<void> {
-    this.tagAliases.delete(tagAlias.id);
+    this.transaction("rw", [this.tags, this.tagAliases], async () => {
+      await this.tagAliases.delete(tagAlias.id);
+
+      tagAlias.tags.forEach(async (tag) => {
+        const storedTag = await this.tags.get({ name: tag });
+        if (!storedTag) return;
+        storedTag.tagAliasIds.delete(tagAlias.id);
+        await this.tags.put(storedTag);
+      });
+    });
   }
 
   private async getTagNamesByTagAlias(
@@ -166,7 +189,7 @@ class MyDB extends Dexie {
 
     const tags = await this.tags
       .where("name")
-      .anyOfIgnoreCase([...tagNames])
+      .anyOf([...tagNames])
       .toArray();
 
     if (tags.length !== tagNames.size) return new Set([]);
