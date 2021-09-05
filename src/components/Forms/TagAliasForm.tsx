@@ -1,13 +1,12 @@
 import React, { useState } from "react";
-import { AliasType } from "db";
+import { TagAlias, AliasType } from "db";
 
 type TagAliasFormProps = {
-  initialAliasName: string;
-  initialType: AliasType;
-  initialTags: string;
+  tagAlias: TagAlias;
   onSubmit: (arg0: { name: string; type: AliasType; tags: string[] }) => void;
   onCancel: () => void;
   validate: (arg0: {
+    id?: number;
     name: string;
     type: AliasType;
     tags: string[];
@@ -15,16 +14,14 @@ type TagAliasFormProps = {
 };
 
 export const TagAliasForm: React.FC<TagAliasFormProps> = ({
-  initialAliasName,
-  initialType,
-  initialTags,
+  tagAlias,
   onSubmit,
   onCancel,
   validate,
 }) => {
-  const [aliasName, setAliasName] = useState<string>(initialAliasName);
-  const [type, setType] = useState<AliasType>(initialType);
-  const [tags, setTags] = useState<string>(initialTags);
+  const [aliasName, setAliasName] = useState<string>(tagAlias.name);
+  const [type, setType] = useState<AliasType>(tagAlias.type);
+  const [tags, setTags] = useState<string>([...tagAlias.tags].join(" "));
 
   return (
     <div
@@ -73,6 +70,7 @@ export const TagAliasForm: React.FC<TagAliasFormProps> = ({
           className="rounded shadow-md focus:shadow-inner px-4 py-2 bg-gray-100 hover:bg-gray-200"
           onClick={() => {
             const params = {
+              id: tagAlias.id,
               name: aliasName,
               type,
               tags: tags

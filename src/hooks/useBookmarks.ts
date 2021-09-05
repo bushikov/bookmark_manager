@@ -2,16 +2,6 @@ import { useState, useEffect } from "react";
 import db, { Bookmark, TagAlias } from "db";
 import { useBookmarksUpdateSwitch } from "hooks";
 
-// type BookmarkUpdateCondition = {
-//   type: "url" | "tag" | "tagAlias" | null;
-//   // detail?: {
-//   //   urls?: string[];
-//   //   tags?: Set<string>;
-//   //   tagAlias?: TagAlias;
-//   // };
-//   detail?: { urls: string[] } | { tags: Set<string> } | { tagAlias: TagAlias };
-// };
-
 type BookmarkUpdateCondition =
   | InitialCondition
   | UrlCondition

@@ -9,3 +9,8 @@ export const tagsUpdateState = atom({
   key: "tagsUpdateState",
   default: true,
 });
+
+export const tagAliasesUpdateState = atom({
+  key: "tagAliasesUpdateState",
+  default: true,
+});

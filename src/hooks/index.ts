@@ -6,6 +6,7 @@ import { useTags } from "./useTags";
 import { useTagAliases } from "./useTagAliases";
 import { useBookmarksUpdateSwitch } from "./useBookmarksUpdateSwitch";
 import { useTagsUpdateSwitch } from "./useTagsUpdateSwitch";
+import { useTagAliasesUpdateSwitch } from "./useTagAliasesUpdateSwitch";
 
 export {
   useChromeTabs,
@@ -16,4 +17,5 @@ export {
   useTagAliases,
   useBookmarksUpdateSwitch,
   useTagsUpdateSwitch,
+  useTagAliasesUpdateSwitch,
 };

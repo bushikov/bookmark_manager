@@ -118,9 +118,7 @@ export const TagList: React.FC<TagListProps> = ({
             }}
           >
             <TagAliasForm
-              initialAliasName={targetTagAlias.name}
-              initialType={targetTagAlias.type}
-              initialTags={[...targetTagAlias.tags].join(" ")}
+              tagAlias={targetTagAlias}
               onSubmit={(alias) => {
                 putTagAlias({ ...alias, tags: new Set(alias.tags) });
                 setIsTagAliasFormOn(false);

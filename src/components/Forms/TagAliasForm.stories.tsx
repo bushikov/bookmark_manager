@@ -13,18 +13,22 @@ const Template: ComponentStory<typeof TagAliasForm> = (args) => (
 
 export const TagAliasFormDefault = Template.bind({});
 TagAliasFormDefault.args = {
-  initialAliasName: "",
-  initialType: "and",
-  initialTags: [],
+  tagAlias: {
+    name: "",
+    type: "and",
+    tags: new Set([]),
+  },
   onSubmit: (arg) => console.log(arg),
   onCancel: () => console.log("CANCEL"),
 };
 
 export const TagAliasFormInitialData = Template.bind({});
 TagAliasFormInitialData.args = {
-  initialAliasName: "エイリアス",
-  initialType: "or",
-  initialTags: ["タグ１", "タグ２"],
+  tagAlias: {
+    name: "エイリアス",
+    type: "or",
+    tags: new Set(["タグ１", "タグ２"]),
+  },
   onSubmit: (arg) => console.log(arg),
   onCancel: () => console.log("CANCEL"),
 };

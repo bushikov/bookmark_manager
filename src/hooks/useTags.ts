@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import db, { Bookmark, Tag } from "db";
-import { useBookmarksUpdateSwitch, useTagsUpdateSwitch } from "hooks";
+import {
+  useBookmarksUpdateSwitch,
+  useTagsUpdateSwitch,
+  useTagAliasesUpdateSwitch,
+} from "hooks";
 
 export const useTags = () => {
   const [tags, setTags] = useState<Tag[]>([]);
@@ -8,6 +12,7 @@ export const useTags = () => {
 
   const { switchState: switchBookmarkState } = useBookmarksUpdateSwitch();
   const { updateState, switchState: switchTagsState } = useTagsUpdateSwitch();
+  const { switchState: switchTagAliasesState } = useTagAliasesUpdateSwitch();
 
   const addTag = async (tag: string, bookmark: Bookmark) => {
     await db.addTag(tag, bookmark);
@@ -19,6 +24,7 @@ export const useTags = () => {
     await db.renameTag(newTag);
     switchBookmarkState();
     switchTagsState();
+    switchTagAliasesState();
   };
 
   const removeTag = async (tag: string, bookmark: Bookmark) => {

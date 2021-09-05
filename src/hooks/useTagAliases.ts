@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import db, { TagAlias } from "db";
+import { useTagsUpdateSwitch } from "hooks";
 
 export const useTagAliases = () => {
   const [tagAliases, setTagAliases] = useState<TagAlias[]>([]);
   const [searchingWords, setSearchingWords] = useState<string[]>([""]);
+
+  const { updateState } = useTagsUpdateSwitch();
 
   const addTagAlias = async (alias: TagAlias) => {};
 
@@ -11,7 +14,7 @@ export const useTagAliases = () => {
     (async () => {
       setTagAliases(await db.searchAliases(searchingWords));
     })();
-  }, [searchingWords]);
+  }, [searchingWords, updateState]);
 
   const putTagAlias = async (tagAlias: TagAlias) => {
     await db.putTagAlias(tagAlias);
