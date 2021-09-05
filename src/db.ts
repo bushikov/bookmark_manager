@@ -112,15 +112,21 @@ class MyDB extends Dexie {
       "rw",
       [this.bookmarks, this.tags, this.tagAliases],
       async () => {
-        const currentTagName = (await this.tags.get(newTag.id)).name;
+        const storedTag = await this.tags.get(newTag.id);
         await this.tags.update(newTag.id, { name: newTag.name });
 
-        const bookmarkIds = (await this.tags.get(newTag.id)).bookmarkIds;
-        bookmarkIds.forEach(async (id) => {
+        storedTag.bookmarkIds.forEach(async (id) => {
           const bookmark = await this.bookmarks.get(id);
-          bookmark.tags.delete(currentTagName);
+          bookmark.tags.delete(storedTag.name);
           bookmark.tags.add(newTag.name);
           await this.bookmarks.put(bookmark);
+        });
+
+        storedTag.tagAliasIds.forEach(async (id) => {
+          const tagAlias = await this.tagAliases.get(id);
+          tagAlias.tags.delete(storedTag.name);
+          tagAlias.tags.add(newTag.name);
+          await this.tagAliases.put(tagAlias);
         });
       }
     );
