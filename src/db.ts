@@ -169,6 +169,8 @@ class MyDB extends Dexie {
       .anyOfIgnoreCase([...tagNames])
       .toArray();
 
+    if (tags.length !== tagNames.size) return new Set([]);
+
     return tags
       .map((tag) => tag.bookmarkIds)
       .reduce((acc, ids) => {
