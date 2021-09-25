@@ -12,12 +12,12 @@ const initialTagAlias: TagAlias = {
 };
 
 type TagListProps = {
-  onTagSelect: (arg0: Set<string>) => void;
+  onTagsSelect: (arg0: Set<string>) => void;
   onTagAliasSelect: (arg0: TagAlias) => void;
 };
 
 export const TagList: React.FC<TagListProps> = ({
-  onTagSelect,
+  onTagsSelect,
   onTagAliasSelect,
 }) => {
   const { tags, renameTag, setSearchingWords } = useTags();
@@ -58,10 +58,19 @@ export const TagList: React.FC<TagListProps> = ({
           title="Tag"
           tags={tags}
           isFocus={focusedComponent === "tag"}
-          onSelect={(label) => {
+          onCheck={(tags) => {
             setFocusedComponent("tag");
-            onTagSelect(new Set([label]));
+            onTagsSelect(
+              [...tags].reduce((acc, tag) => {
+                acc.add(tag.name);
+                return acc;
+              }, new Set() as Set<string>)
+            );
           }}
+          // onSelect={(label) => {
+          //   setFocusedComponent("tag");
+          //   onTagsSelect(new Set([label]));
+          // }}
           onRename={(tag) => {
             setTargetTag(tag);
             setIsTagFormOn(true);

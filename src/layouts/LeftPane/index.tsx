@@ -10,7 +10,7 @@ const TabLabels = ["Window", "Tag"];
 type LeftPaneProps = {
   height: number;
   onWindowSelect: (arg0: number) => void;
-  onTagSelect: (arg0: Set<string>) => void;
+  onTagsSelect: (arg0: Set<string>) => void;
   onTabChange: () => void;
   onTagAliasSelect: (arg0: TagAlias) => void;
 };
@@ -18,7 +18,7 @@ type LeftPaneProps = {
 export const LeftPane: React.FC<LeftPaneProps> = ({
   height,
   onWindowSelect,
-  onTagSelect,
+  onTagsSelect,
   onTabChange,
   onTagAliasSelect,
 }) => {
@@ -38,7 +38,7 @@ export const LeftPane: React.FC<LeftPaneProps> = ({
           <WindowList onWindowSelect={onWindowSelect} />
         ) : (
           <TagList
-            onTagSelect={onTagSelect}
+            onTagsSelect={onTagsSelect}
             onTagAliasSelect={onTagAliasSelect}
           />
         )}

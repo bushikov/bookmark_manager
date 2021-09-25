@@ -17,7 +17,7 @@ const App: React.FC<{}> = () => {
       <LeftPane
         height={windowHeight}
         onWindowSelect={(windowId) => setTargetWindowId(windowId)}
-        onTagSelect={setTags}
+        onTagsSelect={setTags}
         onTabChange={setTargetWindowId}
         onTagAliasSelect={setTagAlias}
       />
