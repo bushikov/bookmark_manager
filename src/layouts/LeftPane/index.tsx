@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import { TagAlias } from "db";
+import { TagAlias, TagSearchType } from "db";
 import { TabHeader } from "components/TabHeader";
 import { WindowList } from "./WindowList";
 import { TagList } from "./TagList";
@@ -13,6 +13,7 @@ type LeftPaneProps = {
   onTagsSelect: (arg0: Set<string>) => void;
   onTabChange: () => void;
   onTagAliasSelect: (arg0: TagAlias) => void;
+  onTagSearchTypeChange: (arg0: TagSearchType) => void;
 };
 
 export const LeftPane: React.FC<LeftPaneProps> = ({
@@ -21,6 +22,7 @@ export const LeftPane: React.FC<LeftPaneProps> = ({
   onTagsSelect,
   onTabChange,
   onTagAliasSelect,
+  onTagSearchTypeChange,
 }) => {
   const [tabIndex, setTabIndex] = useState(0);
 
@@ -40,6 +42,7 @@ export const LeftPane: React.FC<LeftPaneProps> = ({
           <TagList
             onTagsSelect={onTagsSelect}
             onTagAliasSelect={onTagAliasSelect}
+            onTagSearchTypeChange={onTagSearchTypeChange}
           />
         )}
       </div>

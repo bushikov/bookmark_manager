@@ -27,6 +27,7 @@ TagAccordionDefault.args = {
     },
   ],
   isFocus: true,
+  onChangeTagSearchType: (type) => console.log(`TYPE ${type}`),
   onCheck: (tags) => console.log(`ON CHECK ${JSON.stringify(tags)}`),
   onSelect: (label) => console.log(label),
   onRename: (tag) => console.log(`ON RENAME ${JSON.stringify(tag)}`),

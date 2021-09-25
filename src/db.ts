@@ -25,6 +25,8 @@ export type TagAlias = {
   tags: Set<string>;
 };
 
+export type TagSearchType = "and" | "or";
+
 class MyDB extends Dexie {
   bookmarks: Dexie.Table<Bookmark, number>;
   tags: Dexie.Table<Tag, number>;
@@ -43,18 +45,15 @@ class MyDB extends Dexie {
     return this.bookmarks.where("url").anyOf(urls).toArray();
   }
 
-  async getBookmarksByTags(tags: Set<string>): Promise<Bookmark[]> {
-    const bookmarkIds = await this.tags
-      .where("name")
-      .anyOf([...tags])
-      .toArray((records) =>
-        records.reduce((acc, record) => {
-          record.bookmarkIds.forEach((bookmarkId) => acc.add(bookmarkId));
-          return acc;
-        }, new Set() as Set<number>)
-      );
-
-    return this.bookmarks.bulkGet([...bookmarkIds]);
+  async getBookmarksByTags(
+    tags: Set<string>,
+    type: TagSearchType
+  ): Promise<Bookmark[]> {
+    if (type == "and") {
+      return this.getBookmarksHavingAllTags(tags);
+    } else {
+      return this.getBookmarksByAnyOfTags(tags);
+    }
   }
 
   async getBookmarksByTagAlias(tagAlias: TagAlias): Promise<Bookmark[]> {
@@ -62,11 +61,9 @@ class MyDB extends Dexie {
 
     switch (tagAlias.type) {
       case "and":
-        return this.bookmarks.bulkGet([
-          ...(await this.getBookmarkIdsHavingAllTags(tagNames)),
-        ]);
+        return this.getBookmarksHavingAllTags(tagNames);
       case "or":
-        return this.getBookmarksByTags(tagNames);
+        return this.getBookmarksByAnyOfTags(tagNames);
     }
   }
 
@@ -209,6 +206,30 @@ class MyDB extends Dexie {
         });
         return intersection;
       });
+  }
+
+  private async getBookmarksByAnyOfTags(
+    tags: Set<string>
+  ): Promise<Bookmark[]> {
+    const bookmarkIds = await this.tags
+      .where("name")
+      .anyOf([...tags])
+      .toArray((records) =>
+        records.reduce((acc, record) => {
+          record.bookmarkIds.forEach((bookmarkId) => acc.add(bookmarkId));
+          return acc;
+        }, new Set() as Set<number>)
+      );
+
+    return this.bookmarks.bulkGet([...bookmarkIds]);
+  }
+
+  private async getBookmarksHavingAllTags(
+    tags: Set<string>
+  ): Promise<Bookmark[]> {
+    return this.bookmarks.bulkGet([
+      ...(await this.getBookmarkIdsHavingAllTags(tags)),
+    ]);
   }
 }
 

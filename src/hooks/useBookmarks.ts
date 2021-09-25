@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import db, { Bookmark, TagAlias } from "db";
+import db, { Bookmark, TagAlias, TagSearchType } from "db";
 import { useBookmarksUpdateSwitch } from "hooks";
 
 type BookmarkUpdateCondition =
@@ -20,7 +20,10 @@ type UrlCondition = {
 
 type TagCondition = {
   type: "tag";
-  detail: Set<string>;
+  detail: {
+    data: Set<string>;
+    tagSearchType: TagSearchType;
+  };
 };
 
 type TagAliasCondition = {
@@ -41,6 +44,9 @@ export const useBookmarks = () => {
   const [conditions, setConditions] = useState<BookmarkUpdateCondition>(
     initialBookmarkUpdateCondition
   );
+  const [tagSearchType, setTagSearchType] = useState<TagSearchType>(
+    "or" as TagSearchType
+  );
 
   const { updateState } = useBookmarksUpdateSwitch();
 
@@ -49,8 +55,8 @@ export const useBookmarks = () => {
   }, [urls]);
 
   useEffect(() => {
-    setConditions({ type: "tag", detail: tags });
-  }, [tags]);
+    setConditions({ type: "tag", detail: { data: tags, tagSearchType } });
+  }, [tags, tagSearchType]);
 
   useEffect(() => {
     if (!tagAlias) return;
@@ -74,7 +80,12 @@ export const useBookmarks = () => {
         break;
       case "tag":
         (async () => {
-          setBookmarks(await db.getBookmarksByTags(conditions.detail));
+          setBookmarks(
+            await db.getBookmarksByTags(
+              conditions.detail.data,
+              conditions.detail.tagSearchType
+            )
+          );
         })();
         break;
       case "tagAlias":
@@ -90,6 +101,7 @@ export const useBookmarks = () => {
     bookmarks,
     setUrls,
     setTags,
+    setTagSearchType,
     setTagAlias,
   };
 };

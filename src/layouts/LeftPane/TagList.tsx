@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import { Tag, TagAlias } from "db";
+import { Tag, TagAlias, TagSearchType } from "db";
 import { useTags, useTagAliases } from "hooks";
 import { TagAccordion, TagAliasAccordion } from "components/Accordions";
 import { TagForm, TagAliasForm } from "components/Forms";
@@ -14,11 +14,13 @@ const initialTagAlias: TagAlias = {
 type TagListProps = {
   onTagsSelect: (arg0: Set<string>) => void;
   onTagAliasSelect: (arg0: TagAlias) => void;
+  onTagSearchTypeChange: (arg0: TagSearchType) => void;
 };
 
 export const TagList: React.FC<TagListProps> = ({
   onTagsSelect,
   onTagAliasSelect,
+  onTagSearchTypeChange,
 }) => {
   const { tags, renameTag, setSearchingWords } = useTags();
   const { tagAliases, putTagAlias, removeTagAlias } = useTagAliases();
@@ -58,6 +60,7 @@ export const TagList: React.FC<TagListProps> = ({
           title="Tag"
           tags={tags}
           isFocus={focusedComponent === "tag"}
+          onTagSearchTypeChange={onTagSearchTypeChange}
           onCheck={(tags) => {
             setFocusedComponent("tag");
             onTagsSelect(
@@ -67,10 +70,6 @@ export const TagList: React.FC<TagListProps> = ({
               }, new Set() as Set<string>)
             );
           }}
-          // onSelect={(label) => {
-          //   setFocusedComponent("tag");
-          //   onTagsSelect(new Set([label]));
-          // }}
           onRename={(tag) => {
             setTargetTag(tag);
             setIsTagFormOn(true);
