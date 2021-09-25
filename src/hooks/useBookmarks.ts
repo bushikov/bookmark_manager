@@ -79,9 +79,6 @@ export const useBookmarks = () => {
         })();
         break;
       case "tag":
-        console.log("================");
-        console.log(conditions);
-
         (async () => {
           setBookmarks(
             await db.getBookmarksByTags(
