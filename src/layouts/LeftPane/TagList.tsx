@@ -33,11 +33,9 @@ export const TagList: React.FC<TagListProps> = ({
   const [targetTagAlias, setTargetTagAlias] = useState<TagAlias>(
     initialTagAlias
   );
-  const [tagLabels, setTagLabels] = useState<string[]>([]);
-
-  useEffect(() => {
-    setTagLabels(tags.map((tag) => tag.name));
-  }, [tags]);
+  const [checkedTagNames, setCheckedTagNames] = useState<Set<string>>(
+    new Set([])
+  );
 
   return (
     <>
@@ -60,15 +58,20 @@ export const TagList: React.FC<TagListProps> = ({
           title="Tag"
           tags={tags}
           isFocus={focusedComponent === "tag"}
+          checkedTagNames={checkedTagNames}
           onTagSearchTypeChange={onTagSearchTypeChange}
-          onCheck={(tags) => {
+          onTagCheckChange={(tagName) => {
             setFocusedComponent("tag");
-            onTagsSelect(
-              [...tags].reduce((acc, tag) => {
-                acc.add(tag.name);
-                return acc;
-              }, new Set() as Set<string>)
-            );
+
+            let newTagNames = new Set([...checkedTagNames]);
+            if (checkedTagNames.has(tagName)) {
+              newTagNames.delete(tagName);
+            } else {
+              newTagNames.add(tagName);
+            }
+            setCheckedTagNames(newTagNames);
+
+            onTagsSelect(newTagNames);
           }}
           onRename={(tag) => {
             setTargetTag(tag);

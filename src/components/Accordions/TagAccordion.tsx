@@ -6,8 +6,9 @@ export type TagAccordionProps = {
   title: string;
   tags: Tag[];
   isFocus: boolean;
+  checkedTagNames: Set<string>;
   onTagSearchTypeChange: (arg0: TagSearchType) => void;
-  onCheck: (arg0: Set<Tag>) => void;
+  onTagCheckChange: (arg0: string) => void;
   onRename: (arg0: Tag) => void;
 };
 
@@ -15,12 +16,12 @@ export const TagAccordion: React.FC<TagAccordionProps> = ({
   title,
   tags,
   isFocus,
+  checkedTagNames,
   onTagSearchTypeChange,
-  onCheck,
+  onTagCheckChange,
   onRename,
 }) => {
   const [isFolded, setIsFolded] = useState(false);
-  const [checkedTags, setCheckedTags] = useState<Set<Tag>>(new Set());
   const [type, setType] = useState<TagSearchType>("or");
 
   return (
@@ -54,25 +55,18 @@ export const TagAccordion: React.FC<TagAccordionProps> = ({
           <div
             key={tag.id}
             className={`border border-gray-200 pl-8 py-2 pr-2 ${
-              isFocus && checkedTags.has(tag) ? "bg-gray-100" : "bg-white"
+              isFocus && checkedTagNames.has(tag.name)
+                ? "bg-gray-100"
+                : "bg-white"
             }`}
           >
             <label className="flex flex-row justify-between items-center">
               <input
                 type="checkbox"
                 style={{ height: 12, width: 12 }}
-                checked={checkedTags.has(tag)}
+                checked={checkedTagNames.has(tag.name)}
                 onChange={() => {
-                  let newTags = new Set([...checkedTags]);
-                  if (checkedTags.has(tag)) {
-                    newTags.delete(tag);
-                    setCheckedTags(newTags);
-                  } else {
-                    newTags.add(tag);
-                    setCheckedTags(newTags);
-                  }
-
-                  onCheck(newTags);
+                  onTagCheckChange(tag.name);
                 }}
               />
               <p className="px-2 py-1 flex-grow">{tag.name}</p>
