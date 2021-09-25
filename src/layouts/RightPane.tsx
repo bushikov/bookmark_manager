@@ -32,12 +32,21 @@ export const RightPane: React.FC<RightPaneProps> = ({
 
   useEffect(() => {
     setExtractedBookmarks(
-      bookmarks.filter((b) => {
-        if (text === "") return true;
-        if (b.title.indexOf(text) !== -1) return true;
-        if (b.url.indexOf(text) !== -1) return true;
-        return false;
-      })
+      bookmarks
+        .filter((b) => {
+          if (text === "") return true;
+          if (b.title.indexOf(text) !== -1) return true;
+          if (b.url.indexOf(text) !== -1) return true;
+          return false;
+        })
+        .sort((a, b) => {
+          if (a.title < b.title) {
+            return -1;
+          } else {
+            return 1;
+          }
+          return 0;
+        })
     );
   }, [text, bookmarks]);
 

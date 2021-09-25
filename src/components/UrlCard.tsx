@@ -40,13 +40,16 @@ export const UrlCard: React.FC<UrlCardProps> = ({
       </div>
       {tags && tags.length !== 0 && (
         <div className="px-4 pt-2 flex flex-row flex-wrap gap-2">
-          {tags.map((tag) => (
-            <Tag
-              key={tag}
-              title={tag}
-              onCrossClick={(text) => onDelete(text)}
-            />
-          ))}
+          {tags
+            .slice()
+            .sort()
+            .map((tag) => (
+              <Tag
+                key={tag}
+                title={tag}
+                onCrossClick={(text) => onDelete(text)}
+              />
+            ))}
         </div>
       )}
       <div className="px-4 pt-2 space-x-2 flex flex-row">
