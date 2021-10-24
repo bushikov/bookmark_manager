@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 import { Tag, TagSearchType } from "db";
+
+type SortType = "Tag Asc" | "Tag Desc" | "Number Asc" | "Number Desc";
 
 export type TagAccordionProps = {
   title: string;
@@ -23,6 +25,56 @@ export const TagAccordion: React.FC<TagAccordionProps> = ({
 }) => {
   const [isFolded, setIsFolded] = useState(false);
   const [type, setType] = useState<TagSearchType>("or");
+  const [sortType, setSortType] = useState<SortType>("Tag Asc");
+  const [sortedTags, setSortedTags] = useState<Tag[]>(tags);
+
+  useEffect(() => {
+    console.log("===================");
+    console.log(sortType);
+
+    switch (sortType) {
+      case "Tag Asc": {
+        const t = [...tags];
+        t.sort((a, b) => {
+          if (a.name < b.name) return -1;
+          if (a.name > b.name) return 1;
+          return 0;
+        });
+        setSortedTags(t);
+        break;
+      }
+      case "Tag Desc": {
+        const t = [...tags];
+        t.sort((a, b) => {
+          if (a.name < b.name) return 1;
+          if (a.name > b.name) return -1;
+          return 0;
+        });
+        setSortedTags(t);
+        break;
+      }
+      case "Number Asc": {
+        const t = [...tags];
+        t.sort((a, b) => {
+          if (a.bookmarkIds.size < b.bookmarkIds.size) return -1;
+          if (a.bookmarkIds.size > b.bookmarkIds.size) return 1;
+          return 0;
+        });
+        setSortedTags(t);
+        break;
+      }
+      case "Number Desc": {
+        const t = [...tags];
+        t.sort((a, b) => {
+          if (a.bookmarkIds.size < b.bookmarkIds.size) return 1;
+          if (a.bookmarkIds.size > b.bookmarkIds.size) return -1;
+          return 0;
+        });
+        setSortedTags(t);
+        break;
+      }
+    }
+  }, [sortType, tags]);
 
   return (
     <div>
@@ -31,6 +83,25 @@ export const TagAccordion: React.FC<TagAccordionProps> = ({
         onClick={() => setIsFolded(!isFolded)}
       >
         {title}
+        <div
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          ソート
+          <select
+            className="ml-2 rounded bg-gray-100 shadow-inner focus:ring focus:outline-none"
+            value={sortType}
+            onChange={(e) => {
+              setSortType(e.target.value as SortType);
+            }}
+          >
+            <option value="Tag Asc">Tag Asc</option>
+            <option value="Tag Desc">Tag Desc</option>
+            <option value="Number Asc">Number Asc</option>
+            <option value="Number Desc">Number Desc</option>
+          </select>
+        </div>
         <div
           onClick={(e) => {
             e.stopPropagation();
@@ -51,7 +122,7 @@ export const TagAccordion: React.FC<TagAccordionProps> = ({
         </div>
       </div>
       {!isFolded &&
-        tags.map((tag, index) => (
+        sortedTags.map((tag, index) => (
           <div
             key={tag.id}
             className={`border border-gray-200 pl-8 py-2 pr-2 ${
@@ -69,7 +140,7 @@ export const TagAccordion: React.FC<TagAccordionProps> = ({
                   onTagCheckChange(tag.name);
                 }}
               />
-              <p className="px-2 py-1 flex-grow">{tag.name}</p>
+              <p className="px-2 py-1 flex-grow">{`${tag.name} ( ${tag.bookmarkIds.size} )`}</p>
               <div className="flex space-x-3">
                 <button
                   className="rounded px-2 py-1 bg-blue-500 text-white hover:bg-blue-700 focus:ring shadow-lg"
