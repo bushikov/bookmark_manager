@@ -87,6 +87,7 @@ export const UrlCard: React.FC<UrlCardProps> = ({
             }}
           />
           {isFocused &&
+            text.trim().length !== 0 &&
             addableTagCandidates &&
             addableTagCandidates.length !== 0 && (
               <ul className="absolute bg-white w-full border border-gray-200 pl-2 py-1 max-h-28 overflow-y-scroll z-50">
