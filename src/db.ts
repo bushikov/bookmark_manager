@@ -78,6 +78,54 @@ class MyDB extends Dexie {
       .toArray();
   }
 
+  async getAllBookmarks(): Promise<
+    {
+      id: number;
+      title: string;
+      url: string;
+      tags: string[];
+      favIconUrl: string;
+    }[]
+  > {
+    const bookmarks = await this.bookmarks.toArray();
+    return bookmarks.map((b) => ({
+      id: b.id,
+      title: b.title,
+      url: b.url,
+      tags: [...b.tags],
+      favIconUrl: b.favIconUrl,
+    }));
+  }
+
+  async getAllTags(): Promise<
+    {
+      id: number;
+      name: string;
+      bookmarkIds: number[];
+      tagAliasIds: number[];
+    }[]
+  > {
+    const tags = await this.tags.toArray();
+    return tags.map((t) => ({
+      id: t.id,
+      name: t.name,
+      bookmarkIds: [...t.bookmarkIds],
+      tagAliasIds: [...t.tagAliasIds],
+    }));
+  }
+
+  async getAllAliases(): Promise<
+    { id: number; name: string; type: string; tags: string[] }[]
+  > {
+    const aliases = await this.tagAliases.toArray();
+    return aliases.map((ta) => ({
+      id: ta.id,
+      name: ta.name,
+      type: ta.type,
+      tags: [...ta.tags],
+    }));
+  }
+
   addTag(tagName: string, bookmark: Bookmark): Promise<void> {
     return this.transaction("rw", [this.bookmarks, this.tags], async () => {
       const tagsToPut = bookmark.tags
